@@ -329,7 +329,7 @@ GET    /api/v1/conversations/:uuid/messages
 
 #### 5.2.1.1 对话树管理
 
-依赖数据库表 `conversation_trees`，`tree_data` JSON 结构与 `docs/database-schema.md` 中的定义一致（根节点及其children递归构成一棵树）。
+依赖数据库表 `conversation_trees`，`tree_data` 由后端基于会话列表计算生成后直接入库，客户端无需上传树结构。
 
 ```
 GET    /api/v1/trees
@@ -339,8 +339,6 @@ GET    /api/v1/trees
          "items": [
            {
              "tree_id": "tree-xxx",
-             "title": "监控方案演进",
-             "description": "从Prometheus到多种方案对比",
              "created_at": "2025-11-20T10:00:00Z",
              "updated_at": "2025-11-20T10:00:00Z"
            }
@@ -351,36 +349,14 @@ GET    /api/v1/trees
        }
 
 POST   /api/v1/trees
+       功能: 创建新的对话树
        请求:
        {
-         "title": "监控方案演进",
-         "description": "从Prometheus到多种方案对比",
-         "tree_data": {
-           "nodes": [
-             {
-               "conversation_uuid": "conv-abc123",
-               "parent_uuid": null,
-               "order": 0,
-               "notes": "初始方案",
-               "children": [
-                 {
-                   "conversation_uuid": "conv-def456",
-                   "parent_uuid": "conv-abc123",
-                   "order": 0,
-                   "notes": "改进方案",
-                   "children": []
-                  },
-                  {
-                    "conversation_uuid": "conv-ghi789",
-                    "parent_uuid": "conv-abc123",
-                    "order": 1,
-                    "notes": "并行方案",
-                    "children": []
-                  }
-                ]
-              }
-            ]
-          }
+         "conversation_uuids": [
+           "conv-abc123",
+           "conv-def456",
+           "conv-ghi789"
+         ]
        }
        响应:
        {
@@ -388,74 +364,35 @@ POST   /api/v1/trees
          "created_at": "2025-11-20T10:00:00Z",
          "updated_at": "2025-11-20T10:00:00Z"
        }
-       功能: 创建新的对话树，后端生成`tree_id`并将完整结构写入conversation_trees.tree_data
+       说明: 后端根据会话列表生成tree_data并写入conversation_trees，前端无需提供标题、描述或树结构。
+
+POST   /api/v1/tree/update
+       功能: 更新既有对话树
+       请求:
+       {
+         "tree_id": "tree-xxx",
+         "conversation_uuids": [
+           "conv-abc123",
+           "conv-jkl012"
+         ]
+       }
+       响应:
+       {
+         "tree_id": "tree-xxx",
+         "updated_at": "2025-11-21T09:00:00Z"
+       }
+       说明: 后端使用新的会话列表重新计算tree_data并覆盖conversation_trees记录。
 
 GET    /api/v1/trees/:tree_id
        响应:
        {
          "tree_id": "tree-xxx",
-         "title": "监控方案演进",
-         "description": "从Prometheus到多种方案对比",
          "tree_data": {
-           "nodes": [
-             {
-               "conversation_uuid": "conv-abc123",
-               "parent_uuid": null,
-               "order": 0,
-               "notes": "初始方案",
-                "children": [
-                 {
-                   "conversation_uuid": "conv-def456",
-                   "parent_uuid": "conv-abc123",
-                   "order": 0,
-                   "notes": "改进方案",
-                   "children": []
-                 }
-               ]
-             }
-           ]
+           "nodes": [...]
          },
          "created_at": "2025-11-20T10:00:00Z",
-         "updated_at": "2025-11-20T10:00:00Z"
+         "updated_at": "2025-11-21T09:00:00Z"
        }
-
-PUT    /api/v1/trees/:tree_id
-       请求:
-       {
-         "title": "监控方案演进",
-         "description": "从Prometheus到多种方案对比",
-         "tree_data": {
-           "nodes": [
-             {
-               "conversation_uuid": "conv-abc123",
-               "parent_uuid": null,
-               "order": 0,
-               "notes": "初始方案",
-               "children": [
-                 {
-                   "conversation_uuid": "conv-def456",
-                   "parent_uuid": "conv-abc123",
-                   "order": 0,
-                   "notes": "改进方案",
-                   "children": []
-                 },
-                 {
-                   "conversation_uuid": "conv-jkl012",
-                   "parent_uuid": "conv-abc123",
-                   "order": 1,
-                   "notes": "新方案",
-                   "children": []
-                 }
-               ]
-             }
-           ]
-        }
-       }
-       功能: 覆盖更新元数据与tree_data（整棵树）
-
-PATCH  /api/v1/trees/:tree_id
-       请求: {title, description}
-       功能: 仅更新树的元数据（不改tree_data）
 
 DELETE /api/v1/trees/:tree_id
        功能: 删除conversation_trees中的整棵树记录
