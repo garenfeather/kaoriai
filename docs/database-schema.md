@@ -144,7 +144,6 @@ CREATE TABLE messages (
     role TEXT NOT NULL,                         -- user|assistant|system
     content_type TEXT NOT NULL,                 -- text|tool_use|tool_result|multipart
     content TEXT NOT NULL,                      -- JSON格式完整内容
-    content_text TEXT,                          -- 纯文本提取(user和assistant的文字,用于Bleve索引)
 
     -- 时间戳
     created_at DATETIME NOT NULL,
@@ -222,20 +221,13 @@ CREATE INDEX idx_msg_hidden ON messages(hidden_at);
 }
 ```
 
-**content_text字段提取规则:**
-- 对`role='user'`和`role='assistant'`的消息提取
-- 从`content` JSON中提取所有type=text的文本
-- 多个文本块用空格连接
-- 用于Bleve全文索引
-
 **说明:**
 - `uuid`: 作为主键,消息唯一标识
 - `conversation_uuid`: 外键关联conversations表
 - `round_index` (round序号): 一问一答算一轮,便于查询上下文
 - `parent_uuid`: 支持分支对话,构建对话树
 - `content_type`: 实际存在的类型为 text | tool_use | tool_result | multipart
-- `content`: 完整保存原始结构,前端可直接解析渲染
-- `content_text`: user和assistant的纯文本,用于Bleve全文索引
+- `content`: 完整保存原始结构,前端可直接解析渲染；全文索引用的纯文本在索引阶段从content实时提取（不落库）
 - `hidden_at`: 隐藏功能,NULL表示未隐藏,NOT NULL表示已隐藏
 
 **图片处理:**
@@ -523,7 +515,6 @@ CREATE TABLE IF NOT EXISTS messages (
     role TEXT NOT NULL,
     content_type TEXT NOT NULL,
     content TEXT NOT NULL,
-    content_text TEXT,
     created_at DATETIME NOT NULL,
     hidden_at DATETIME,
     FOREIGN KEY (conversation_uuid) REFERENCES conversations(uuid) ON DELETE CASCADE
@@ -750,7 +741,7 @@ SELECT
             AND hidden_at IS NULL LIMIT 1
         )
         WHEN 'message' THEN (
-            SELECT SUBSTR(content_text, 1, 100) || '...' FROM messages WHERE uuid = f.target_id AND hidden_at IS NULL
+            SELECT ''  -- 预览需在应用层解析content生成摘要
         )
         WHEN 'fragment' THEN (
             SELECT SUBSTR(content, 1, 100) || '...' FROM fragments WHERE uuid = f.target_id AND hidden_at IS NULL
@@ -832,7 +823,7 @@ CREATE INDEX idx_msg_conv_role ON messages(conversation_uuid, role);
 
 ```sql
 -- 避免SELECT *,只查询需要的字段
-SELECT uuid, content_text, created_at FROM messages
+SELECT uuid, content, created_at FROM messages
 WHERE conversation_uuid = ?;
 
 -- 使用LIMIT减少返回数据量
