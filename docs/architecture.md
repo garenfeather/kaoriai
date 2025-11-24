@@ -275,12 +275,12 @@ AI对话数据综合管理系统,用于集成和管理多个AI工具的对话历
 | 组件 | 职责 | 存储内容 |
 |------|------|---------|
 | **SQLite** | 结构化数据存储 | conversations, messages(完整JSON), favorites, tags, fragments |
-| **Bleve** | 全文搜索索引 | message_uuid + content_text + 过滤字段(source_type, role, created_at) |
+| **Bleve** | 全文搜索索引 | message_uuid + 提取的纯文本(content_text,实时生成) + 过滤字段(source_type, role, created_at) |
 | **文件系统** | 二进制文件 | 图片文件(JPEG/PNG等) |
 
 **同步规则:**
 1. 写入message时,同时写SQLite和Bleve
-2. 当`content_text`非空时,索引到Bleve(包括user和assistant)
+2. 索引时从content实时提取纯文本(content_text)，不落库，直接写Bleve
 3. 图片不索引,只在SQLite记录metadata,文件存本地
 4. 删除操作软删除(hidden_at)
 
@@ -537,7 +537,6 @@ POST   /internal/v1/sync/batch
                  "role": "user",
                  "content_type": "text",
                  "content": {...},
-                 "content_text": "...",
                  "created_at": "2025-11-20T10:00:00Z"
                }
              ]

@@ -67,7 +67,7 @@
 
 | 组件 | 职责 | 存储内容 |
 |------|------|---------|
-| **Bleve** | 全文搜索 + 过滤 | message_uuid, content_text, source_type, role, created_at |
+| **Bleve** | 全文搜索 + 过滤 | message_uuid, content_text(索引阶段从content提取), source_type, role, created_at |
 | **SQLite** | 结构化数据存储 | 完整的conversations, messages, favorites, tags等 |
 
 **为什么这样设计?**
@@ -110,7 +110,7 @@ type BleveMessageDocument struct {
     ConversationUUID  string    `json:"conversation_uuid"`  // 对话UUID
 
     // ===== 搜索字段 =====
-    ContentText       string    `json:"content_text"`       // 纯文本内容(全文索引)
+    ContentText       string    `json:"content_text"`       // 纯文本内容(全文索引，索引阶段从content提取)
 
     // ===== 过滤字段 =====
     SourceType        string    `json:"source_type"`        // 数据来源: gpt|claude|...
@@ -128,7 +128,7 @@ type BleveMessageDocument struct {
 |------|------|---------|------|
 | message_uuid | string | Stored(不索引) | 回查SQLite |
 | conversation_uuid | string | Stored(不索引) | 回查SQLite |
-| content_text | string | **CJK Analyzer全文索引** | 搜索主体 |
+| content_text | string | **CJK Analyzer全文索引** | 搜索主体（从content实时提取，不落库） |
 | source_type | string | Keyword(精确匹配) | 过滤来源(避免回查性能损失) |
 | role | string | Keyword(精确匹配) | 过滤角色(区分用户提问/AI回答) |
 | created_at | datetime | DateTimeField | 时间范围过滤 |
@@ -652,16 +652,15 @@ func rebuildIndexBySource(index bleve.Index, dbConn *sql.DB, sourceType string) 
         index.Batch(batch)
     }
 
-    // 2. 从SQLite查询该来源的所有消息
+    // 2. 从SQLite查询该来源的所有消息（content_text不落库，稍后提取）
     rows, err := dbConn.Query(`
-        SELECT m.uuid, m.conversation_uuid, m.role, m.content_text,
+        SELECT m.uuid, m.conversation_uuid, m.role, m.content,
                m.created_at, c.source_type, c.title
         FROM messages m
         JOIN conversations c ON m.conversation_uuid = c.uuid
         WHERE m.hidden_at IS NULL
           AND c.hidden_at IS NULL
           AND c.source_type = ?
-          AND m.content_text != ''
     `, sourceType)
     if err != nil {
         return fmt.Errorf("query messages failed: %w", err)
@@ -675,16 +674,23 @@ func rebuildIndexBySource(index bleve.Index, dbConn *sql.DB, sourceType string) 
     for rows.Next() {
         var msg Message
         var convTitle string
+        var rawContent string
         err := rows.Scan(&msg.UUID, &msg.ConversationUUID,
-                        &msg.Role, &msg.ContentText, &msg.CreatedAt,
+                        &msg.Role, &rawContent, &msg.CreatedAt,
                         &msg.SourceType, &convTitle)
         if err != nil {
             return fmt.Errorf("scan row failed: %w", err)
         }
 
+        // 从content解析出纯文本（仅用于索引）
+        msg.ContentText = extractPlainText(rawContent)
+        if msg.ContentText == "" {
+            continue
+        }
+
         doc := &BleveMessageDocument{
             MessageUUID:       msg.UUID,
-            ConversationUUID: msg.ConversationUUID,
+            ConversationUUID:  msg.ConversationUUID,
             ContentText:       msg.ContentText,
             SourceType:        msg.SourceType,
             Role:              msg.Role,
