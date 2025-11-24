@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LEGIMIN - 聊天应用</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 左侧边栏 -->
+        <div class="sidebar">
+            <!-- 宠物卡片 -->
+            <div class="pet-card">
+                <h1>LEGIMIN</h1>
+                <p class="info">3 minutes old<br>Level 1</p>
+                <div class="pet-avatar">
+                    <div class="smile"></div>
+                </div>
+                <div class="wave"></div>
+            </div>
+
+            <!-- 导航栏 -->
+            <div class="nav-bar">
+                <div class="nav-icon icon-user"></div>
+                <div class="nav-icon icon-refresh active"></div>
+                <div class="nav-icon icon-shop"></div>
+                <div class="nav-icon icon-settings"></div>
+            </div>
+
+            <!-- 聊天列表 -->
+            <div class="chat-list">
+                <div class="chat-item active" data-user="johndoe92">
+                    <div class="chat-name">johndoe92</div>
+                    <div class="chat-preview">Hello mate, hav'r it going?</div>
+                </div>
+
+                <div class="chat-item" data-user="小明">
+                    <div class="chat-name">小明</div>
+                    <div class="chat-preview">今天天气真不错啊</div>
+                </div>
+
+                <div class="chat-item" data-user="田中さん">
+                    <div class="chat-name">田中さん</div>
+                    <div class="chat-preview">明日は会議がありますか？</div>
+                </div>
+
+                <div class="chat-item" data-user="김민수">
+                    <div class="chat-name">김민수</div>
+                    <div class="chat-preview">오늘 저녁에 시간 있어요?</div>
+                </div>
+
+                <div class="chat-item" data-user="Sarah_Chen">
+                    <div class="chat-name">Sarah_Chen</div>
+                    <div class="chat-preview">Can we reschedule the meeting?</div>
+                </div>
+
+                <div class="chat-item" data-user="李华">
+                    <div class="chat-name">李华</div>
+                    <div class="chat-preview">项目进度怎么样了？</div>
+                </div>
+
+                <div class="chat-item" data-user="佐藤健">
+                    <div class="chat-name">佐藤健</div>
+                    <div class="chat-preview">お疲れ様です</div>
+                </div>
+
+                <div class="chat-item" data-user="박지민">
+                    <div class="chat-name">박지민</div>
+                    <div class="chat-preview">내일 봐요!</div>
+                </div>
+
+                <div class="chat-item" data-user="Michael_Wong">
+                    <div class="chat-name">Michael_Wong</div>
+                    <div class="chat-preview">Thanks for your help!</div>
+                </div>
+
+                <div class="chat-item" data-user="王芳">
+                    <div class="chat-name">王芳</div>
+                    <div class="chat-preview">晚上一起吃饭吧</div>
+                </div>
+
+                <div class="chat-item" data-user="山田太郎">
+                    <div class="chat-name">山田太郎</div>
+                    <div class="chat-preview">資料を送りました</div>
+                </div>
+
+                <div class="chat-item" data-user="이수진">
+                    <div class="chat-name">이수진</div>
+                    <div class="chat-preview">잘 지내시죠?</div>
+                </div>
+
+                <div class="chat-item" data-user="Emily_Park">
+                    <div class="chat-name">Emily_Park</div>
+                    <div class="chat-preview">See you tomorrow!</div>
+                </div>
+
+                <div class="chat-item" data-user="张伟">
+                    <div class="chat-name">张伟</div>
+                    <div class="chat-preview">收到了，谢谢</div>
+                </div>
+
+                <div class="chat-item" data-user="鈴木一郎">
+                    <div class="chat-name">鈴木一郎</div>
+                    <div class="chat-preview">よろしくお願いします</div>
+                </div>
+
+                <div class="chat-item" data-user="최영희">
+                    <div class="chat-name">최영희</div>
+                    <div class="chat-preview">감사합니다!</div>
+                </div>
+
+                <div class="chat-item" data-user="David_Kim">
+                    <div class="chat-name">David_Kim</div>
+                    <div class="chat-preview">Let's discuss this later</div>
+                </div>
+
+                <div class="chat-item" data-user="陈静">
+                    <div class="chat-name">陈静</div>
+                    <div class="chat-preview">明天见面聊吧</div>
+                </div>
+
+                <div class="chat-item" data-user="渡辺美咲">
+                    <div class="chat-name">渡辺美咲</div>
+                    <div class="chat-preview">了解しました</div>
+                </div>
+
+                <div class="chat-item" data-user="정우성">
+                    <div class="chat-name">정우성</div>
+                    <div class="chat-preview">좋은 하루 보내세요</div>
+                </div>
+
+                <div class="chat-item" data-user="Jessica_Liu">
+                    <div class="chat-name">Jessica_Liu</div>
+                    <div class="chat-preview">Great work everyone!</div>
+                </div>
+
+                <div class="chat-item" data-user="刘洋">
+                    <div class="chat-name">刘洋</div>
+                    <div class="chat-preview">这个想法不错</div>
+                </div>
+
+                <div class="chat-item" data-user="高橋花子">
+                    <div class="chat-name">高橋花子</div>
+                    <div class="chat-preview">ありがとうございます</div>
+                </div>
+
+                <div class="chat-item" data-user="강민호">
+                    <div class="chat-name">강민호</div>
+                    <div class="chat-preview">알겠습니다</div>
+                </div>
+
+                <div class="chat-item" data-user="Robert_Zhang">
+                    <div class="chat-name">Robert_Zhang</div>
+                    <div class="chat-preview">I'll send you the details</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右侧聊天区域 -->
+        <div class="chat-area">
+            <!-- 聊天头部 -->
+            <div class="chat-header">
+                <div class="chat-title">johndoe92</div>
+            </div>
+
+            <!-- 消息列表 -->
+            <div class="messages">
+                <div class="message left">
+                    <div class="message-bubble">
+                        <div class="message-text">Hello there? sup?</div>
+                    </div>
+                    <div class="message-time">09:00</div>
+                </div>
+
+                <div class="message right">
+                    <div class="message-bubble">
+                        <div class="message-text">嗨！最近怎么样？</div>
+                    </div>
+                    <div class="message-time">09:02</div>
+                </div>
+
+                <div class="message left">
+                    <div class="message-bubble">
+                        <div class="message-text">Pretty good! Working on a new project.</div>
+                    </div>
+                    <div class="message-time">09:05</div>
+                </div>
+
+                <div class="message right">
+                    <div class="message-bubble">
+                        <div class="message-text">听起来不错，是什么项目？</div>
+                    </div>
+                    <div class="message-time">09:06</div>
+                </div>
+
+                <div class="message left">
+                    <div class="message-bubble">
+                        <div class="message-text">It's a chat application with multilingual support</div>
+                    </div>
+                    <div class="message-time">09:08</div>
+                </div>
+
+                <div class="message right">
+                    <div class="message-bubble">
+                        <div class="message-text">すごいですね！いつ完成しますか？</div>
+                    </div>
+                    <div class="message-time">09:10</div>
+                </div>
+
+                <div class="message left">
+                    <div class="message-bubble">
+                        <div class="message-text">Should be ready by next week</div>
+                    </div>
+                    <div class="message-time">09:12</div>
+                </div>
+
+                <div class="message right">
+                    <div class="message-bubble">
+                        <div class="message-text">期待してます！</div>
+                    </div>
+                    <div class="message-time">09:15</div>
+                </div>
+
+                <div class="message left">
+                    <div class="message-bubble">
+                        <div class="message-text">Thanks! I'll keep you updated.</div>
+                    </div>
+                    <div class="message-time">09:18</div>
+                </div>
+
+                <div class="message right">
+                    <div class="message-bubble">
+                        <div class="message-text">今天下午有空吗？我们可以一起讨论一下</div>
+                    </div>
+                    <div class="message-time">10:00</div>
+                </div>
+
+                <div class="message left">
+                    <div class="message-bubble">
+                        <div class="message-text">Sure! What time works for you?</div>
+                    </div>
+                    <div class="message-time">10:05</div>
+                </div>
+
+                <div class="message right">
+                    <div class="message-bubble">
+                        <div class="message-text">3시쯤 어때요?</div>
+                    </div>
+                    <div class="message-time">10:08</div>
+                </div>
+
+                <div class="message left">
+                    <div class="message-bubble">
+                        <div class="message-text">Perfect! See you then.</div>
+                    </div>
+                    <div class="message-time">10:10</div>
+                </div>
+
+                <div class="message right">
+                    <div class="message-bubble">
+                        <div class="message-text">好的，到时候见！</div>
+                    </div>
+                    <div class="message-time">10:12</div>
+                </div>
+
+                <div class="message left">
+                    <div class="message-bubble">
+                        <div class="message-text">By the way, did you see the latest update?</div>
+                    </div>
+                    <div class="message-time">11:30</div>
+                </div>
+
+                <div class="message right">
+                    <div class="message-bubble">
+                        <div class="message-text">아직 못 봤어요. 무슨 업데이트인가요?</div>
+                    </div>
+                    <div class="message-time">11:35</div>
+                </div>
+
+                <div class="message left">
+                    <div class="message-bubble">
+                        <div class="message-text">They added dark mode support!</div>
+                    </div>
+                    <div class="message-time">11:38</div>
+                </div>
+
+                <div class="message right">
+                    <div class="message-bubble">
+                        <div class="message-text">太棒了！我一直在等这个功能</div>
+                    </div>
+                    <div class="message-time">11:40</div>
+                </div>
+
+                <div class="message left">
+                    <div class="message-bubble">
+                        <div class="message-text">Yeah, it looks amazing in dark mode</div>
+                    </div>
+                    <div class="message-time">11:42</div>
+                </div>
+
+                <div class="message right">
+                    <div class="message-bubble">
+                        <div class="message-text">早速試してみます！</div>
+                    </div>
+                    <div class="message-time">11:45</div>
+                </div>
+
+                <div class="message left">
+                    <div class="message-bubble">
+                        <div class="message-text">Let me know what you think!</div>
+                    </div>
+                    <div class="message-time">11:48</div>
+                </div>
+
+                <div class="message right">
+                    <div class="message-bubble">
+                        <div class="message-text">당연하죠! 곧 피드백 드릴게요</div>
+                    </div>
+                    <div class="message-time">11:50</div>
+                </div>
+
+                <div class="message left">
+                    <div class="message-bubble">
+                        <div class="message-text">Great! Looking forward to it.</div>
+                    </div>
+                    <div class="message-time">11:52</div>
+                </div>
+
+                <div class="message right">
+                    <div class="message-bubble">
+                        <div class="message-text">对了，明天的会议你准备好了吗？</div>
+                    </div>
+                    <div class="message-time">14:00</div>
+                </div>
+
+                <div class="message left">
+                    <div class="message-bubble">
+                        <div class="message-text">Almost done with the presentation</div>
+                    </div>
+                    <div class="message-time">14:05</div>
+                </div>
+
+                <div class="message right">
+                    <div class="message-bubble">
+                        <div class="message-text">素晴らしい！資料を共有してもらえますか？</div>
+                    </div>
+                    <div class="message-time">14:08</div>
+                </div>
+
+                <div class="message left">
+                    <div class="message-bubble">
+                        <div class="message-text">I'll send it over in an hour</div>
+                    </div>
+                    <div class="message-time">14:10</div>
+                </div>
+
+                <div class="message right">
+                    <div class="message-bubble">
+                        <div class="message-text">감사합니다! 기다릴게요</div>
+                    </div>
+                    <div class="message-time">14:12</div>
+                </div>
+
+                <div class="message left">
+                    <div class="message-bubble">
+                        <div class="message-text">No problem! Happy to help.</div>
+                    </div>
+                    <div class="message-time">14:15</div>
+                </div>
+
+                <div class="message right">
+                    <div class="message-bubble">
+                        <div class="message-text">你真是太好了，非常感谢！</div>
+                    </div>
+                    <div class="message-time">14:18</div>
+                </div>
+
+                <div class="message left">
+                    <div class="message-bubble">
+                        <div class="message-text">Anytime! We're a team after all.</div>
+                    </div>
+                    <div class="message-time">14:20</div>
+                </div>
+
+                <div class="message right">
+                    <div class="message-bubble">
+                        <div class="message-text">そうですね。チームワークが大切です！</div>
+                    </div>
+                    <div class="message-time">14:22</div>
+                </div>
+
+                <div class="message left">
+                    <div class="message-bubble">
+                        <div class="message-text">Exactly! That's what makes us successful.</div>
+                    </div>
+                    <div class="message-time">14:25</div>
+                </div>
+
+                <div class="message right">
+                    <div class="message-bubble">
+                        <div class="message-text">완전 동감이에요!</div>
+                    </div>
+                    <div class="message-time">14:28</div>
+                </div>
+
+                <div class="message left">
+                    <div class="message-bubble">
+                        <div class="message-text">How's your weekend looking?</div>
+                    </div>
+                    <div class="message-time">15:00</div>
+                </div>
+
+                <div class="message right">
+                    <div class="message-bubble">
+                        <div class="message-text">还不错，打算去爬山</div>
+                    </div>
+                    <div class="message-time">15:05</div>
+                </div>
+
+                <div class="message left">
+                    <div class="message-bubble">
+                        <div class="message-text">That sounds fun! Which mountain?</div>
+                    </div>
+                    <div class="message-time">15:08</div>
+                </div>
+
+                <div class="message right">
+                    <div class="message-bubble">
+                        <div class="message-text">富士山に登る予定です</div>
+                    </div>
+                    <div class="message-time">15:10</div>
+                </div>
+
+                <div class="message left">
+                    <div class="message-bubble">
+                        <div class="message-text">Wow! That's ambitious! Good luck!</div>
+                    </div>
+                    <div class="message-time">15:12</div>
+                </div>
+
+                <div class="message right">
+                    <div class="message-bubble">
+                        <div class="message-text">고마워요! 최선을 다할게요</div>
+                    </div>
+                    <div class="message-time">15:15</div>
+                </div>
+
+                <div class="message left">
+                    <div class="message-bubble">
+                        <div class="message-text">Take lots of pictures!</div>
+                    </div>
+                    <div class="message-time">15:18</div>
+                </div>
+
+                <div class="message right">
+                    <div class="message-bubble">
+                        <div class="message-text">当然！我会拍很多照片的</div>
+                    </div>
+                    <div class="message-time">15:20</div>
+                </div>
+
+                <div class="message left">
+                    <div class="message-bubble">
+                        <div class="message-text">Can't wait to see them!</div>
+                    </div>
+                    <div class="message-time">15:22</div>
+                </div>
+
+                <div class="message right">
+                    <div class="message-bubble">
+                        <div class="message-text">楽しみにしていてください！</div>
+                    </div>
+                    <div class="message-time">15:25</div>
+                </div>
+
+                <div class="message left">
+                    <div class="message-bubble">
+                        <div class="message-text">I definitely will!</div>
+                    </div>
+                    <div class="message-time">15:28</div>
+                </div>
+
+                <div class="message right">
+                    <div class="message-bubble">
+                        <div class="message-text">저녁에 또 이야기해요!</div>
+                    </div>
+                    <div class="message-time">15:30</div>
+                </div>
+
+                <div class="message left">
+                    <div class="message-bubble">
+                        <div class="message-text">Sounds good! Talk to you later!</div>
+                    </div>
+                    <div class="message-time">15:32</div>
+                </div>
+
+                <div class="message right">
+                    <div class="message-bubble">
+                        <div class="message-text">再见！</div>
+                    </div>
+                    <div class="message-time">15:35</div>
+                </div>
+
+                <div class="message left">
+                    <div class="message-bubble">
+                        <div class="message-text">See you! Have a great day!</div>
+                    </div>
+                    <div class="message-time">15:38</div>
+                </div>
+
+                <div class="message right">
+                    <div class="message-bubble">
+                        <div class="message-text">あなたもね！</div>
+                    </div>
+                    <div class="message-time">15:40</div>
+                </div>
+
+                <div class="message left">
+                    <div class="message-bubble">
+                        <div class="message-text">Thanks! 😊</div>
+                    </div>
+                    <div class="message-time">15:42</div>
+                </div>
+
+                <div class="message right">
+                    <div class="message-bubble">
+                        <div class="message-text">좋은 하루 보내세요!</div>
+                    </div>
+                    <div class="message-time">15:45</div>
+                </div>
+            </div>
+
+            <!-- 输入区域 -->
+            <div class="input-area">
+                <input type="text" class="message-input" placeholder="type something">
+                <div class="send-btn icon-send"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 聊天项点击事件
+        document.querySelectorAll('.chat-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.chat-item').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+
+                const username = this.dataset.user;
+                document.querySelector('.chat-title').textContent = username;
+            });
+        });
+    </script>
+</body>
+</html>
