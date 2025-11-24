@@ -1,0 +1,108 @@
+# 数据目录
+data/
+bin/
+parsed/
+parsed_conversations/
+output/
+test_output*/
+
+# 图片文件
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.bmp
+*.svg
+*.ico
+*.webp
+*.tiff
+*.tif
+
+# 压缩包
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.rar
+*.7z
+*.bz2
+*.gz
+*.xz
+*.z
+
+# 可执行文件
+*.exe
+*.out
+*.app
+*.bin
+gpt_conversation_parse
+decode_json_value
+compare_json
+
+# Backend 相关
+backend/conversation-server
+backend/*.pid
+backend/*.log
+
+# Go 相关
+*.test
+*.prof
+go.sum
+
+# Python 相关
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+*.egg
+*.egg-info/
+dist/
+build/
+
+# 日志文件
+*.log
+
+# 临时文件
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# IDE 相关
+.idea/
+.vscode/
+*.iml
+.project
+.classpath
+.settings/
+
+# Node modules
+node_modules/
+package-lock.json
+
+# 数据库文件
+*.db
+*.sqlite
+*.sqlite3
+
+# 环境变量和配置文件
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*secret*
+*credential*
+
+# API 认证文件
+auth.json
+config.toml
+
+# 文档目录（包含私人信息）
+docs/

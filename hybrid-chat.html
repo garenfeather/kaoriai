@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hybrid Chat Interface</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f0f4ff;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* 顶部导航栏 */
+        .top-bar {
+            height: 60px;
+            background-color: white;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 24px;
+        }
+
+        .top-bar-left h1 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 2px;
+        }
+
+        .top-bar-left .session-info {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .online-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: #1e40af;
+            background-color: #dbeafe;
+            padding: 6px 12px;
+            border-radius: 12px;
+        }
+
+        .online-status::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background-color: #3b82f6;
+            border-radius: 50%;
+        }
+
+        /* 主容器 */
+        .main-container {
+            display: flex;
+            height: calc(100vh - 60px);
+        }
+
+        /* 左侧边栏 - 使用 claude-code-chat.html 的样式 */
+        .sidebar {
+            width: 280px;
+            background-color: #f8faff;
+            border-right: 1px solid #dde4f0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .new-session-btn {
+            margin: 16px;
+            padding: 10px 16px;
+            background-color: white;
+            border: 1px solid #c7d2fe;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #333;
+            transition: background-color 0.2s;
+        }
+
+        .new-session-btn:hover {
+            background-color: #eff6ff;
+        }
+
+        .session-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 8px;
+        }
+
+        .session-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            margin-bottom: 4px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            position: relative;
+        }
+
+        .session-item:hover {
+            background-color: #e0e7ff;
+        }
+
+        .session-item.active {
+            background-color: #dbeafe;
+        }
+
+        .session-item.error::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background-color: #ef4444;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .session-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .session-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: #1a1a1a;
+            margin-bottom: 2px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .session-time {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .sidebar-footer {
+            padding: 12px 16px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .project-selector {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background-color: white;
+            border: 1px solid #c7d2fe;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .project-selector:hover {
+            background-color: #f1f5f9;
+        }
+
+        .project-name {
+            font-size: 14px;
+            color: #333;
+        }
+
+        .dropdown-icon {
+            width: 16px;
+            height: 16px;
+            color: #999;
+        }
+
+        /* 右侧聊天区域 - 使用 index.html 的样式 */
+        .chat-area {
+            flex: 1;
+            background: white;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            display: flex;
+            flex-direction: column;
+            max-width: 75%;
+        }
+
+        .message.left {
+            align-self: flex-start;
+        }
+
+        .message.right {
+            align-self: flex-end;
+        }
+
+        .message-bubble {
+            padding: 12px 16px;
+            border-radius: 18px;
+            position: relative;
+            word-wrap: break-word;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .message.left .message-bubble {
+            background: #6FB9B8;
+            color: white;
+            border-bottom-left-radius: 4px;
+        }
+
+        .message.right .message-bubble {
+            background: #F5F5F5;
+            color: #333;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message-text {
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .message-time {
+            font-size: 10px;
+            margin-top: 4px;
+            opacity: 0.6;
+        }
+
+        .message.left .message-time {
+            color: white;
+        }
+
+        .message.right .message-time {
+            color: #999;
+            text-align: right;
+        }
+
+        /* 输入区域 - 使用 index.html 的样式 */
+        .input-area {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            border-top: 1px solid #F0F0F0;
+            gap: 10px;
+        }
+
+        .message-input {
+            flex: 1;
+            border: none;
+            outline: none;
+            padding: 12px 16px;
+            background: #F5F5F5;
+            border-radius: 20px;
+            font-size: 14px;
+            color: #333;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .message-input::placeholder {
+            color: #AAA;
+        }
+
+        .send-btn {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6FB9B8;
+            font-size: 20px;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+        }
+
+        .send-btn:hover {
+            opacity: 0.8;
+        }
+
+        .icon-send::before {
+            content: '📎';
+            transform: rotate(45deg);
+            display: block;
+        }
+
+        /* 滚动条样式 */
+        .session-list::-webkit-scrollbar,
+        .messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .session-list::-webkit-scrollbar-track,
+        .messages::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .session-list::-webkit-scrollbar-thumb,
+        .messages::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+
+        .session-list::-webkit-scrollbar-thumb:hover,
+        .messages::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <div class="top-bar">
+        <div class="top-bar-left">
+            <h1 id="current-chat-title">johndoe92</h1>
+            <div class="session-info">Session • HC7Dr1z-qE0hYzHcFKnZ6</div>
+        </div>
+        <div class="online-status">Online</div>
+    </div>
+
+    <!-- 主容器 -->
+    <div class="main-container">
+        <!-- 左侧边栏 -->
+        <div class="sidebar">
+            <button class="new-session-btn">
+                <span>+</span>
+                <span>New Session</span>
+            </button>
+
+            <div class="session-list">
+                <div class="session-item active">
+                    <div class="session-content">
+                        <div class="session-title">johndoe92</div>
+                        <div class="session-time">Active 22 hrs ago</div>
+                    </div>
+                </div>
+
+                <div class="session-item">
+                    <div class="session-content">
+                        <div class="session-title">小明</div>
+                        <div class="session-time">1 day ago</div>
+                    </div>
+                </div>
+
+                <div class="session-item">
+                    <div class="session-content">
+                        <div class="session-title">田中さん</div>
+                        <div class="session-time">2 days ago</div>
+                    </div>
+                </div>
+
+                <div class="session-item error">
+                    <div class="session-content">
+                        <div class="session-title">김민수</div>
+                        <div class="session-time">3 days ago</div>
+                    </div>
+                </div>
+
+                <div class="session-item">
+                    <div class="session-content">
+                        <div class="session-title">Sarah_Chen</div>
+                        <div class="session-time">1 week ago</div>
+                    </div>
+                </div>
+
+                <div class="session-item">
+                    <div class="session-content">
+                        <div class="session-title">李华</div>
+                        <div class="session-time">1 week ago</div>
+                    </div>
+                </div>
+
+                <div class="session-item error">
+                    <div class="session-content">
+                        <div class="session-title">佐藤健</div>
+                        <div class="session-time">2 weeks ago</div>
+                    </div>
+                </div>
+
+                <div class="session-item">
+                    <div class="session-content">
+                        <div class="session-title">박지민</div>
+                        <div class="session-time">2 weeks ago</div>
+                    </div>
+                </div>
+
+                <div class="session-item">
+                    <div class="session-content">
+                        <div class="session-title">Michael_Wong</div>
+                        <div class="session-time">3 weeks ago</div>
+                    </div>
+                </div>
+
+                <div class="session-item">
+                    <div class="session-content">
+                        <div class="session-title">王芳</div>
+                        <div class="session-time">1 month ago</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="project-selector">
+                    <span class="project-name">Current Project</span>
+                    <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右侧聊天区域 -->
+        <div class="chat-area">
+            <!-- 消息列表 -->
+            <div class="messages">
+                <div class="message left">
+                    <div class="message-bubble">
+                        <div class="message-text">Hello there? sup?</div>
+                    </div>
+                    <div class="message-time">09:00</div>
+                </div>
+
+                <div class="message right">
+                    <div class="message-bubble">
+                        <div class="message-text">嗨！最近怎么样?</div>
+                    </div>
+                    <div class="message-time">09:02</div>
+                </div>
+
+                <div class="message left">
+                    <div class="message-bubble">
+                        <div class="message-text">Pretty good! Working on a new project.</div>
+                    </div>
+                    <div class="message-time">09:05</div>
+                </div>
+
+                <div class="message right">
+                    <div class="message-bubble">
+                        <div class="message-text">听起来不错，是什么项目?</div>
+                    </div>
+                    <div class="message-time">09:06</div>
+                </div>
+
+                <div class="message left">
+                    <div class="message-bubble">
+                        <div class="message-text">It's a chat application with multilingual support</div>
+                    </div>
+                    <div class="message-time">09:08</div>
+                </div>
+
+                <div class="message right">
+                    <div class="message-bubble">
+                        <div class="message-text">すごいですね！いつ完成しますか?</div>
+                    </div>
+                    <div class="message-time">09:10</div>
+                </div>
+
+                <div class="message left">
+                    <div class="message-bubble">
+                        <div class="message-text">Should be ready by next week</div>
+                    </div>
+                    <div class="message-time">09:12</div>
+                </div>
+
+                <div class="message right">
+                    <div class="message-bubble">
+                        <div class="message-text">期待してます!</div>
+                    </div>
+                    <div class="message-time">09:15</div>
+                </div>
+
+                <div class="message left">
+                    <div class="message-bubble">
+                        <div class="message-text">Thanks! I'll keep you updated.</div>
+                    </div>
+                    <div class="message-time">09:18</div>
+                </div>
+
+                <div class="message right">
+                    <div class="message-bubble">
+                        <div class="message-text">今天下午有空吗?我们可以一起讨论一下</div>
+                    </div>
+                    <div class="message-time">10:00</div>
+                </div>
+
+                <div class="message left">
+                    <div class="message-bubble">
+                        <div class="message-text">Sure! What time works for you?</div>
+                    </div>
+                    <div class="message-time">10:05</div>
+                </div>
+
+                <div class="message right">
+                    <div class="message-bubble">
+                        <div class="message-text">3시쯤 어때요?</div>
+                    </div>
+                    <div class="message-time">10:08</div>
+                </div>
+
+                <div class="message left">
+                    <div class="message-bubble">
+                        <div class="message-text">Perfect! See you then.</div>
+                    </div>
+                    <div class="message-time">10:10</div>
+                </div>
+
+                <div class="message right">
+                    <div class="message-bubble">
+                        <div class="message-text">好的，到时候见!</div>
+                    </div>
+                    <div class="message-time">10:12</div>
+                </div>
+
+                <div class="message left">
+                    <div class="message-bubble">
+                        <div class="message-text">By the way, did you see the latest update?</div>
+                    </div>
+                    <div class="message-time">11:30</div>
+                </div>
+
+                <div class="message right">
+                    <div class="message-bubble">
+                        <div class="message-text">아직 못 봤어요. 무슨 업데이트인가요?</div>
+                    </div>
+                    <div class="message-time">11:35</div>
+                </div>
+
+                <div class="message left">
+                    <div class="message-bubble">
+                        <div class="message-text">They added dark mode support!</div>
+                    </div>
+                    <div class="message-time">11:38</div>
+                </div>
+
+                <div class="message right">
+                    <div class="message-bubble">
+                        <div class="message-text">太棒了!我一直在等这个功能</div>
+                    </div>
+                    <div class="message-time">11:40</div>
+                </div>
+
+                <div class="message left">
+                    <div class="message-bubble">
+                        <div class="message-text">Yeah, it looks amazing in dark mode</div>
+                    </div>
+                    <div class="message-time">11:42</div>
+                </div>
+
+                <div class="message right">
+                    <div class="message-bubble">
+                        <div class="message-text">早速試してみます!</div>
+                    </div>
+                    <div class="message-time">11:45</div>
+                </div>
+
+                <div class="message left">
+                    <div class="message-bubble">
+                        <div class="message-text">Let me know what you think!</div>
+                    </div>
+                    <div class="message-time">11:48</div>
+                </div>
+
+                <div class="message right">
+                    <div class="message-bubble">
+                        <div class="message-text">당연하죠! 곧 피드백 드릴게요</div>
+                    </div>
+                    <div class="message-time">11:50</div>
+                </div>
+
+                <div class="message left">
+                    <div class="message-bubble">
+                        <div class="message-text">Great! Looking forward to it.</div>
+                    </div>
+                    <div class="message-time">11:52</div>
+                </div>
+
+                <div class="message right">
+                    <div class="message-bubble">
+                        <div class="message-text">对了，明天的会议你准备好了吗?</div>
+                    </div>
+                    <div class="message-time">14:00</div>
+                </div>
+
+                <div class="message left">
+                    <div class="message-bubble">
+                        <div class="message-text">Almost done with the presentation</div>
+                    </div>
+                    <div class="message-time">14:05</div>
+                </div>
+            </div>
+
+            <!-- 输入区域 -->
+            <div class="input-area">
+                <input type="text" class="message-input" placeholder="type something">
+                <div class="send-btn icon-send"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 会话切换功能
+        document.querySelectorAll('.session-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.session-item').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+
+                const sessionTitle = this.querySelector('.session-title').textContent;
+                // 更新顶部标题栏
+                document.getElementById('current-chat-title').textContent = sessionTitle;
+            });
+        });
+
+        // 发送消息功能
+        const messageInput = document.querySelector('.message-input');
+        const sendBtn = document.querySelector('.send-btn');
+        const messagesContainer = document.querySelector('.messages');
+
+        function sendMessage() {
+            const text = messageInput.value.trim();
+            if (!text) return;
+
+            const now = new Date();
+            const timeStr = now.getHours().toString().padStart(2, '0') + ':' +
+                           now.getMinutes().toString().padStart(2, '0');
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message right';
+            messageDiv.innerHTML = `
+                <div class="message-bubble">
+                    <div class="message-text">${text}</div>
+                </div>
+                <div class="message-time">${timeStr}</div>
+            `;
+
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+            messageInput.value = '';
+        }
+
+        sendBtn.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // 项目选择器
+        document.querySelector('.project-selector')?.addEventListener('click', function() {
+            alert('项目选择器功能');
+        });
+
+        // 新建会话按钮
+        document.querySelector('.new-session-btn')?.addEventListener('click', function() {
+            alert('新建会话功能');
+        });
+
+        // 自动滚动到最新消息
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    </script>
+</body>
+</html>

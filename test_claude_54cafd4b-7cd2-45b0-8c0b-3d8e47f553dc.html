@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LEGIMIN - 聊天应用</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 左侧边栏 -->
+        <div class="sidebar">
+            <!-- 宠物卡片 -->
+            <div class="pet-card">
+                <h1>LEGIMIN</h1>
+                <p class="info">3 minutes old<br>Level 1</p>
+                <div class="pet-avatar">
+                    <div class="smile"></div>
+                </div>
+                <div class="wave"></div>
+            </div>
+
+            <!-- 导航栏 -->
+            <div class="nav-bar">
+                <div class="nav-icon icon-user"></div>
+                <div class="nav-icon icon-refresh active"></div>
+                <div class="nav-icon icon-shop"></div>
+                <div class="nav-icon icon-settings"></div>
+            </div>
+
+            <!-- 聊天列表 -->
+            <div class="chat-list">
+                <div class="chat-item active" data-user="johndoe92">
+                    <div class="chat-name">johndoe92</div>
+                    <div class="chat-preview">Hello mate, hav'r it going?</div>
+                </div>
+
+                <div class="chat-item" data-user="小明">
+                    <div class="chat-name">小明</div>
+                    <div class="chat-preview">今天天气真不错啊</div>
+                </div>
+
+                <div class="chat-item" data-user="田中さん">
+                    <div class="chat-name">田中さん</div>
+                    <div class="chat-preview">明日は会議がありますか？</div>
+                </div>
+
+                <div class="chat-item" data-user="김민수">
+                    <div class="chat-name">김민수</div>
+                    <div class="chat-preview">오늘 저녁에 시간 있어요?</div>
+                </div>
+
+                <div class="chat-item" data-user="Sarah_Chen">
+                    <div class="chat-name">Sarah_Chen</div>
+                    <div class="chat-preview">Can we reschedule the meeting?</div>
+                </div>
+
+                <div class="chat-item" data-user="李华">
+                    <div class="chat-name">李华</div>
+                    <div class="chat-preview">项目进度怎么样了？</div>
+                </div>
+
+                <div class="chat-item" data-user="佐藤健">
+                    <div class="chat-name">佐藤健</div>
+                    <div class="chat-preview">お疲れ様です</div>
+                </div>
+
+                <div class="chat-item" data-user="박지민">
+                    <div class="chat-name">박지민</div>
+                    <div class="chat-preview">내일 봐요!</div>
+                </div>
+
+                <div class="chat-item" data-user="Michael_Wong">
+                    <div class="chat-name">Michael_Wong</div>
+                    <div class="chat-preview">Thanks for your help!</div>
+                </div>
+
+                <div class="chat-item" data-user="王芳">
+                    <div class="chat-name">王芳</div>
+                    <div class="chat-preview">晚上一起吃饭吧</div>
+                </div>
+
+                <div class="chat-item" data-user="山田太郎">
+                    <div class="chat-name">山田太郎</div>
+                    <div class="chat-preview">資料を送りました</div>
+                </div>
+
+                <div class="chat-item" data-user="이수진">
+                    <div class="chat-name">이수진</div>
+                    <div class="chat-preview">잘 지내시죠?</div>
+                </div>
+
+                <div class="chat-item" data-user="Emily_Park">
+                    <div class="chat-name">Emily_Park</div>
+                    <div class="chat-preview">See you tomorrow!</div>
+                </div>
+
+                <div class="chat-item" data-user="张伟">
+                    <div class="chat-name">张伟</div>
+                    <div class="chat-preview">收到了，谢谢</div>
+                </div>
+
+                <div class="chat-item" data-user="鈴木一郎">
+                    <div class="chat-name">鈴木一郎</div>
+                    <div class="chat-preview">よろしくお願いします</div>
+                </div>
+
+                <div class="chat-item" data-user="최영희">
+                    <div class="chat-name">최영희</div>
+                    <div class="chat-preview">감사합니다!</div>
+                </div>
+
+                <div class="chat-item" data-user="David_Kim">
+                    <div class="chat-name">David_Kim</div>
+                    <div class="chat-preview">Let's discuss this later</div>
+                </div>
+
+                <div class="chat-item" data-user="陈静">
+                    <div class="chat-name">陈静</div>
+                    <div class="chat-preview">明天见面聊吧</div>
+                </div>
+
+                <div class="chat-item" data-user="渡辺美咲">
+                    <div class="chat-name">渡辺美咲</div>
+                    <div class="chat-preview">了解しました</div>
+                </div>
+
+                <div class="chat-item" data-user="정우성">
+                    <div class="chat-name">정우성</div>
+                    <div class="chat-preview">좋은 하루 보내세요</div>
+                </div>
+
+                <div class="chat-item" data-user="Jessica_Liu">
+                    <div class="chat-name">Jessica_Liu</div>
+                    <div class="chat-preview">Great work everyone!</div>
+                </div>
+
+                <div class="chat-item" data-user="刘洋">
+                    <div class="chat-name">刘洋</div>
+                    <div class="chat-preview">这个想法不错</div>
+                </div>
+
+                <div class="chat-item" data-user="高橋花子">
+                    <div class="chat-name">高橋花子</div>
+                    <div class="chat-preview">ありがとうございます</div>
+                </div>
+
+                <div class="chat-item" data-user="강민호">
+                    <div class="chat-name">강민호</div>
+                    <div class="chat-preview">알겠습니다</div>
+                </div>
+
+                <div class="chat-item" data-user="Robert_Zhang">
+                    <div class="chat-name">Robert_Zhang</div>
+                    <div class="chat-preview">I'll send you the details</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右侧聊天区域 -->
+        <div class="chat-area">
+            <!-- 聊天头部 -->
+            <div class="chat-header">
+                <div class="chat-title">johndoe92</div>
+            </div>
+
+            <!-- 消息列表 -->
+            <div class="messages">
+                <div class="message right">
+                    <div class="message-bubble">
+                        <div class="message-text">访问github，用cynaustine88@gmail.com注册一个新账号</div>
+                    </div>
+                    <div class="message-time">14:46</div>
+                </div>
+
+                <div class="message left">
+                    <div class="message-bubble">
+                        <div class="message-text"> 我可以帮你访问GitHub并引导你完成注册流程。让我先打开GitHub网站。
+现在让我截个图看看GitHub首页的情况：
+我看到GitHub首页了。现在我来点击&quot;Sign up&quot;按钮来开始注册流程：
+让我尝试其他方式找到注册按钮：
+很好！现在让我截图查看注册页面：
+现在我在GitHub注册页面。我来填写你提供的邮箱地址：
+邮箱地址已经填好了。不过我需要提醒你，完成GitHub注册还需要：
+
+1. **设置密码** - 你需要创建一个安全的密码
+2. **选择用户名** - 你需要选择一个唯一的GitHub用户名
+3. **验证邮箱** - GitHub会发送验证邮件到你的邮箱
+4. **完成人机验证** - 可能需要完成验证码
+
+由于这些都需要你的个人决定和访问你的邮箱，我建议你：
+
+1. 继续在这个页面上填写你想要的用户名和密码
+2. 查看你的邮箱 (cynaustine88@gmail.com) 获取验证邮件
+3. 按照邮件中的指示完成验证
+
+你希望我继续帮助你填写注册表单的其他部分吗？比如建议一些用户名选项？</div>
+                    </div>
+                    <div class="message-time">14:48</div>
+                </div>
+
+            </div>
+
+            <!-- 输入区域 -->
+            <div class="input-area">
+                <input type="text" class="message-input" placeholder="type something">
+                <div class="send-btn icon-send"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 聊天项点击事件
+        document.querySelectorAll('.chat-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.chat-item').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+
+                const username = this.dataset.user;
+                document.querySelector('.chat-title').textContent = username;
+            });
+        });
+    </script>
+</body>
+</html>
