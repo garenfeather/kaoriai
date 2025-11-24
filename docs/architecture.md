@@ -327,12 +327,12 @@ GET    /api/v1/conversations/:uuid/messages
        响应: message列表(时间线顺序)
 ```
 
-#### 5.2.1.1 分支树管理
+#### 5.2.1.1 对话树管理
 
 依赖数据库表 `conversation_trees`，`tree_data` JSON 结构与 `docs/database-schema.md` 中的定义一致（根节点及其children递归构成一棵树）。
 
 ```
-GET    /api/v1/branches
+GET    /api/v1/trees
        查询参数: page, page_size
        响应:
        {
@@ -350,7 +350,7 @@ GET    /api/v1/branches
          "page_size": 20
        }
 
-POST   /api/v1/branches
+POST   /api/v1/trees
        请求:
        {
          "title": "监控方案演进",
@@ -388,9 +388,9 @@ POST   /api/v1/branches
          "created_at": "2025-11-20T10:00:00Z",
          "updated_at": "2025-11-20T10:00:00Z"
        }
-       功能: 创建新的分支树，后端生成`tree_id`并将完整结构写入conversation_trees.tree_data
+       功能: 创建新的对话树，后端生成`tree_id`并将完整结构写入conversation_trees.tree_data
 
-GET    /api/v1/branches/:tree_id
+GET    /api/v1/trees/:tree_id
        响应:
        {
          "tree_id": "tree-xxx",
@@ -419,7 +419,7 @@ GET    /api/v1/branches/:tree_id
          "updated_at": "2025-11-20T10:00:00Z"
        }
 
-PUT    /api/v1/branches/:tree_id
+PUT    /api/v1/trees/:tree_id
        请求:
        {
          "title": "监控方案演进",
@@ -449,15 +449,15 @@ PUT    /api/v1/branches/:tree_id
                ]
              }
            ]
-         }
+        }
        }
        功能: 覆盖更新元数据与tree_data（整棵树）
 
-PATCH  /api/v1/branches/:tree_id
+PATCH  /api/v1/trees/:tree_id
        请求: {title, description}
        功能: 仅更新树的元数据（不改tree_data）
 
-DELETE /api/v1/branches/:tree_id
+DELETE /api/v1/trees/:tree_id
        功能: 删除conversation_trees中的整棵树记录
 ```
 
