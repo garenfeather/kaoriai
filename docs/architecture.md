@@ -348,29 +348,11 @@ GET    /api/v1/trees
          "page_size": 20
        }
 
-POST   /api/v1/trees
-       功能: 创建新的对话树
-       请求:
-       {
-         "conversation_uuids": [
-           "conv-abc123",
-           "conv-def456",
-           "conv-ghi789"
-         ]
-       }
-       响应:
-       {
-         "tree_id": "tree-xxx",
-         "created_at": "2025-11-20T10:00:00Z",
-         "updated_at": "2025-11-20T10:00:00Z"
-       }
-       说明: 后端根据会话列表生成tree_data并写入conversation_trees，前端无需提供标题、描述或树结构。
-
 POST   /api/v1/tree/update
-       功能: 更新既有对话树
+       功能: 创建或更新对话树（统一入口）
        请求:
        {
-         "tree_id": "tree-xxx",
+         "tree_id": "tree-xxx",        // 可选，缺省时创建新树
          "conversation_uuids": [
            "conv-abc123",
            "conv-jkl012"
@@ -381,7 +363,7 @@ POST   /api/v1/tree/update
          "tree_id": "tree-xxx",
          "updated_at": "2025-11-21T09:00:00Z"
        }
-       说明: 后端使用新的会话列表重新计算tree_data并覆盖conversation_trees记录。
+       说明: 后端根据会话列表计算tree_data写入conversation_trees；提供tree_id则覆盖更新，缺省则创建新tree_id。
 
 GET    /api/v1/trees/:tree_id
        响应:
