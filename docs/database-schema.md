@@ -805,65 +805,16 @@ LIMIT 10;
 
 ---
 
-## 八、性能优化建议
+## 八、注意事项
 
-### 8.1 索引优化
-
-```sql
--- 分析查询计划
-EXPLAIN QUERY PLAN
-SELECT * FROM messages
-WHERE conversation_uuid = ? AND round_index > ?;
-
--- 如果某查询频繁且慢,考虑添加组合索引
-CREATE INDEX idx_msg_conv_role ON messages(conversation_uuid, role);
-```
-
-### 8.2 查询优化
-
-```sql
--- 避免SELECT *,只查询需要的字段
-SELECT uuid, content, created_at FROM messages
-WHERE conversation_uuid = ?;
-
--- 使用LIMIT减少返回数据量
-SELECT * FROM conversations
-ORDER BY created_at DESC
-LIMIT 20;
-
--- 使用覆盖索引避免回表
-CREATE INDEX idx_msg_cover ON messages(conversation_uuid, round_index, role);
-```
-
-### 8.3 批量操作优化
-
-```sql
--- 使用事务批量插入
-BEGIN TRANSACTION;
-INSERT INTO messages (...) VALUES (...);
-INSERT INTO messages (...) VALUES (...);
--- ... 重复1000次
-COMMIT;
-
--- 或使用prepared statement
-PREPARE stmt FROM 'INSERT INTO messages (...) VALUES (?, ?, ...)';
-EXECUTE stmt USING ...;
--- 重复执行
-DEALLOCATE PREPARE stmt;
-```
-
----
-
-## 九、注意事项
-
-### 9.1 并发控制
+### 8.1 并发控制
 
 SQLite的WAL模式支持:
 - ✅ 多个读取并发
 - ✅ 单个写入 + 多个读取并发
 - ❌ 多个写入并发
 
-### 9.2 JSON字段查询
+### 8.2 JSON字段查询
 
 SQLite 3.38+支持JSON函数:
 ```sql
