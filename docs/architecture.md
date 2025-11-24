@@ -446,9 +446,6 @@ GET    /api/v1/favorites
        响应: 收藏列表(字段: id, target_type, target_id, category, notes, created_at)
 
 DELETE /api/v1/favorites/:id
-
-PATCH  /api/v1/favorites/:id
-       请求: {notes: "新备注", category: "inspiration"}
 ```
 
 #### 5.2.5 标签
@@ -466,8 +463,26 @@ POST   /api/v1/conversation-tags
          "tag_id": 1,
          "conversation_uuid": "conv-abc123"
        }
+       功能: 为单个对话添加单个标签
+
+POST   /api/v1/conversation-tags/batch-add
+       请求:
+       {
+         "conversation_uuid": "conv-abc123",
+         "tag_ids": [1, 2, 3]
+       }
+       功能: 一次性为对话添加多个标签（忽略已存在的标签）
 
 DELETE /api/v1/conversation-tags/:id
+       功能: 删除单个对话-标签关联
+
+POST   /api/v1/conversation-tags/batch-remove
+       请求:
+       {
+         "conversation_uuid": "conv-abc123",
+         "tag_ids": [2, 3]
+       }
+       功能: 一次性删除对话的多个标签
 
 GET    /api/v1/tags/:id/conversations
        查询参数: page, page_size
