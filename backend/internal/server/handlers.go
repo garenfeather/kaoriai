@@ -1,6 +1,8 @@
+// Package server 实现所有 API 的请求处理函数
 package server
 
 import (
+	"encoding/json"
 	"net/http"
 	"strconv"
 	"strings"
@@ -9,83 +11,134 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// ListConversations 返回对话列表
+// ========================================
+// 对话管理相关 Handler
+// ========================================
+
+// ListConversations 获取对话列表
+// GET /api/v1/conversations?page=1&page_size=20&source_type=gpt&date_from=xxx&date_to=xxx
 func (h *Handler) ListConversations(c *gin.Context) {
 	page, pageSize := parsePagination(c)
+	sourceType := strings.TrimSpace(c.Query("source_type"))
+	dateFrom := strings.TrimSpace(c.Query("date_from"))
+	dateTo := strings.TrimSpace(c.Query("date_to"))
+
+	conversations, total, err := h.conversationRepo.ListConversations(sourceType, dateFrom, dateTo, page, pageSize)
+	if err != nil {
+		writeError(c, http.StatusInternalServerError, 500, err.Error())
+		return
+	}
+
 	writeOK(c, gin.H{
-		"items": []gin.H{
-			{"uuid": "conv-demo-1", "title": "示例对话", "source_type": "gpt"},
-		},
-		"total":     1,
+		"items":     conversations,
+		"total":     total,
 		"page":      page,
 		"page_size": pageSize,
 	})
 }
 
-// GetConversation 返回对话详情
+// GetConversation 获取单个对话的详细信息
+// GET /api/v1/conversations/:uuid
 func (h *Handler) GetConversation(c *gin.Context) {
 	uuid := strings.TrimSpace(c.Param("uuid"))
 	if uuid == "" {
 		writeError(c, http.StatusBadRequest, 1, "conversation uuid required")
 		return
 	}
-	writeOK(c, gin.H{
-		"uuid":        uuid,
-		"title":       "示例对话",
-		"source_type": "gpt",
-	})
+
+	conversation, err := h.conversationRepo.GetConversation(uuid)
+	if err != nil {
+		writeError(c, http.StatusInternalServerError, 500, err.Error())
+		return
+	}
+	if conversation == nil {
+		writeError(c, http.StatusNotFound, 404, "conversation not found")
+		return
+	}
+
+	writeOK(c, conversation)
 }
 
-// ListConversationMessages 返回指定对话的消息列表
+// ListConversationMessages 获取对话的消息列表
+// GET /api/v1/conversations/:uuid/messages?page=1&page_size=20
 func (h *Handler) ListConversationMessages(c *gin.Context) {
-	if strings.TrimSpace(c.Param("uuid")) == "" {
+	uuid := strings.TrimSpace(c.Param("uuid"))
+	if uuid == "" {
 		writeError(c, http.StatusBadRequest, 1, "conversation uuid required")
 		return
 	}
+
 	page, pageSize := parsePagination(c)
+
+	messages, total, err := h.messageRepo.ListConversationMessages(uuid, page, pageSize)
+	if err != nil {
+		writeError(c, http.StatusInternalServerError, 500, err.Error())
+		return
+	}
+
 	writeOK(c, gin.H{
-		"items": []gin.H{
-			{"uuid": "msg-demo-1", "role": "user", "content_type": "text"},
-		},
-		"total":     1,
+		"items":     messages,
+		"total":     total,
 		"page":      page,
 		"page_size": pageSize,
 	})
 }
 
-// GetMessage 返回消息详情
+// ========================================
+// 消息管理相关 Handler
+// ========================================
+
+// GetMessage 获取单条消息的详细信息
+// GET /api/v1/messages/:uuid
 func (h *Handler) GetMessage(c *gin.Context) {
 	uuid := strings.TrimSpace(c.Param("uuid"))
 	if uuid == "" {
 		writeError(c, http.StatusBadRequest, 1, "message uuid required")
 		return
 	}
-	writeOK(c, gin.H{
-		"uuid":         uuid,
-		"role":         "assistant",
-		"content_type": "text",
-		"content": gin.H{
-			"type": "text",
-			"text": "示例内容",
-		},
-	})
+
+	message, err := h.messageRepo.GetMessage(uuid)
+	if err != nil {
+		writeError(c, http.StatusInternalServerError, 500, err.Error())
+		return
+	}
+	if message == nil {
+		writeError(c, http.StatusNotFound, 404, "message not found")
+		return
+	}
+
+	writeOK(c, message)
 }
 
-// GetMessageContext 返回消息上下文
+// GetMessageContext 获取消息的上下文
+// GET /api/v1/messages/:uuid/context?before=2&after=2
 func (h *Handler) GetMessageContext(c *gin.Context) {
 	uuid := strings.TrimSpace(c.Param("uuid"))
 	if uuid == "" {
 		writeError(c, http.StatusBadRequest, 1, "message uuid required")
 		return
 	}
+
+	before := parsePositiveInt(c.Query("before"), 2)
+	after := parsePositiveInt(c.Query("after"), 2)
+
+	messages, err := h.messageRepo.GetMessageContext(uuid, before, after)
+	if err != nil {
+		writeError(c, http.StatusInternalServerError, 500, err.Error())
+		return
+	}
+
 	writeOK(c, gin.H{
-		"items": []gin.H{
-			{"uuid": uuid, "role": "assistant", "content_type": "text"},
-		},
+		"items": messages,
 	})
 }
 
-// Search 实现搜索请求校验与示例响应
+// ========================================
+// 搜索相关 Handler
+// ========================================
+
+// Search 实现全文搜索功能 (TODO: 集成 Bleve)
+// POST /api/v1/search
 func (h *Handler) Search(c *gin.Context) {
 	var req struct {
 		Keyword  string   `json:"keyword"`
@@ -105,49 +158,59 @@ func (h *Handler) Search(c *gin.Context) {
 		writeError(c, http.StatusBadRequest, 1, "keyword required")
 		return
 	}
+
 	page, pageSize := normalizePage(req.Page, req.PageSize)
+
+	// TODO: 实现 Bleve 搜索引擎集成
 	writeOK(c, gin.H{
-		"total": 1,
-		"items": []gin.H{
-			{
-				"message_uuid":       "msg-search-1",
-				"conversation_uuid":  "conv-search-1",
-				"conversation_title": "搜索示例",
-				"role":               "assistant",
-				"content_type":       "text",
-				"content_preview":    "...示例高亮...",
-				"highlight":          []string{"...示例高亮..."},
-				"source_type":        "gpt",
-				"created_at":         nowRFC3339(),
-				"score":              1.0,
-			},
-		},
+		"total":     0,
+		"items":     []gin.H{},
 		"page":      page,
 		"page_size": pageSize,
 	})
 }
 
-// ListTrees 返回对话树列表
+// ========================================
+// 对话树管理相关 Handler
+// ========================================
+
+// ListTrees 获取对话树列表
+// GET /api/v1/trees?page=1&page_size=20
 func (h *Handler) ListTrees(c *gin.Context) {
 	page, pageSize := parsePagination(c)
+
+	trees, total, err := h.treeRepo.ListTrees(page, pageSize)
+	if err != nil {
+		writeError(c, http.StatusInternalServerError, 500, err.Error())
+		return
+	}
+
+	// 只返回元信息,不包含树结构数据
+	items := []gin.H{}
+	for _, t := range trees {
+		items = append(items, gin.H{
+			"tree_id":    t.TreeID,
+			"title":      t.Title,
+			"created_at": t.CreatedAt.Format(time.RFC3339),
+			"updated_at": t.UpdatedAt.Format(time.RFC3339),
+		})
+	}
+
 	writeOK(c, gin.H{
-		"items": []gin.H{
-			{
-				"tree_id":    "tree-demo",
-				"created_at": nowRFC3339(),
-				"updated_at": nowRFC3339(),
-			},
-		},
-		"total":     1,
+		"items":     items,
+		"total":     total,
 		"page":      page,
 		"page_size": pageSize,
 	})
 }
 
-// UpdateTree 创建或更新对话树（根据tree_id是否为空区分）
+// UpdateTree 创建或更新对话树
+// POST /api/v1/tree/update
 func (h *Handler) UpdateTree(c *gin.Context) {
 	var req struct {
 		TreeID            string   `json:"tree_id"`
+		Title             string   `json:"title"`
+		Description       string   `json:"description"`
 		ConversationUUIDs []string `json:"conversation_uuids"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -158,44 +221,86 @@ func (h *Handler) UpdateTree(c *gin.Context) {
 		writeError(c, http.StatusBadRequest, 1, "conversation_uuids required and must be non-empty")
 		return
 	}
+
 	treeID := strings.TrimSpace(req.TreeID)
 	if treeID == "" {
 		treeID = "tree-" + strconv.FormatInt(timeNowUnix(), 10)
 	}
+
+	req.Title = strings.TrimSpace(req.Title)
+	req.Description = strings.TrimSpace(req.Description)
+
+	// 构建简单的树结构数据(JSON格式)
+	// 实际应用中可以根据业务需求构建更复杂的树结构
+	treeDataMap := gin.H{
+		"conversation_uuids": req.ConversationUUIDs,
+		"node_count":         len(req.ConversationUUIDs),
+	}
+	treeDataJSON, err := jsonMarshal(treeDataMap)
+	if err != nil {
+		writeError(c, http.StatusInternalServerError, 500, "failed to marshal tree data")
+		return
+	}
+
+	// 保存到数据库
+	err = h.treeRepo.UpsertTree(treeID, req.Title, req.Description, treeDataJSON)
+	if err != nil {
+		writeError(c, http.StatusInternalServerError, 500, err.Error())
+		return
+	}
+
 	writeOK(c, gin.H{
 		"tree_id":    treeID,
 		"updated_at": nowRFC3339(),
 	})
 }
 
-// GetTree 返回树详情
+// GetTree 获取对话树的详细信息
+// GET /api/v1/trees/:tree_id
 func (h *Handler) GetTree(c *gin.Context) {
 	treeID := strings.TrimSpace(c.Param("tree_id"))
 	if treeID == "" {
 		writeError(c, http.StatusBadRequest, 1, "tree_id required")
 		return
 	}
-	writeOK(c, gin.H{
-		"tree_id": treeID,
-		"tree_data": gin.H{
-			"nodes": []gin.H{},
-		},
-		"created_at": nowRFC3339(),
-		"updated_at": nowRFC3339(),
-	})
+
+	tree, err := h.treeRepo.GetTree(treeID)
+	if err != nil {
+		writeError(c, http.StatusInternalServerError, 500, err.Error())
+		return
+	}
+	if tree == nil {
+		writeError(c, http.StatusNotFound, 404, "tree not found")
+		return
+	}
+
+	writeOK(c, tree)
 }
 
-// DeleteTree 删除树记录
+// DeleteTree 删除对话树
+// DELETE /api/v1/trees/:tree_id
 func (h *Handler) DeleteTree(c *gin.Context) {
 	treeID := strings.TrimSpace(c.Param("tree_id"))
 	if treeID == "" {
 		writeError(c, http.StatusBadRequest, 1, "tree_id required")
 		return
 	}
-	writeOK(c, gin.H{"tree_id": treeID})
+
+	err := h.treeRepo.DeleteTree(treeID)
+	if err != nil {
+		writeError(c, http.StatusInternalServerError, 500, err.Error())
+		return
+	}
+
+	writeOK(c, gin.H{"deleted": true, "tree_id": treeID})
 }
 
+// ========================================
+// 收藏管理相关 Handler
+// ========================================
+
 // CreateFavorite 创建收藏
+// POST /api/v1/favorites
 func (h *Handler) CreateFavorite(c *gin.Context) {
 	var req struct {
 		TargetType string `json:"target_type"`
@@ -209,57 +314,92 @@ func (h *Handler) CreateFavorite(c *gin.Context) {
 	}
 	req.TargetType = strings.TrimSpace(req.TargetType)
 	req.TargetID = strings.TrimSpace(req.TargetID)
+	req.Category = strings.TrimSpace(req.Category)
+
 	if req.TargetType == "" || req.TargetID == "" {
 		writeError(c, http.StatusBadRequest, 1, "target_type and target_id required")
 		return
 	}
+
 	allowed := map[string]bool{"conversation": true, "round": true, "message": true, "fragment": true}
 	if !allowed[req.TargetType] {
 		writeError(c, http.StatusBadRequest, 1, "invalid target_type")
 		return
 	}
-	writeOK(c, gin.H{
-		"id":          "fav-demo-1",
-		"target_type": req.TargetType,
-		"target_id":   req.TargetID,
-		"category":    req.Category,
-		"notes":       req.Notes,
-		"created_at":  nowRFC3339(),
-	})
+
+	favorite, err := h.favoriteRepo.CreateFavorite(req.TargetType, req.TargetID, req.Category, req.Notes)
+	if err != nil {
+		writeError(c, http.StatusInternalServerError, 500, err.Error())
+		return
+	}
+
+	writeOK(c, favorite)
 }
 
-// ListFavorites 收藏列表
+// ListFavorites 获取收藏列表
+// GET /api/v1/favorites?category=tech_solution&page=1&page_size=20
 func (h *Handler) ListFavorites(c *gin.Context) {
 	page, pageSize := parsePagination(c)
+	category := strings.TrimSpace(c.Query("category"))
+
+	favorites, total, err := h.favoriteRepo.ListFavorites(category, page, pageSize)
+	if err != nil {
+		writeError(c, http.StatusInternalServerError, 500, err.Error())
+		return
+	}
+
 	writeOK(c, gin.H{
-		"items": []gin.H{
-			{"id": "fav-demo-1", "target_type": "message", "target_id": "msg-demo-1", "category": "default"},
-		},
-		"total":     1,
+		"items":     favorites,
+		"total":     total,
 		"page":      page,
 		"page_size": pageSize,
 	})
 }
 
 // DeleteFavorite 删除收藏
+// DELETE /api/v1/favorites/:id
 func (h *Handler) DeleteFavorite(c *gin.Context) {
-	if strings.TrimSpace(c.Param("id")) == "" {
+	idStr := strings.TrimSpace(c.Param("id"))
+	if idStr == "" {
 		writeError(c, http.StatusBadRequest, 1, "favorite id required")
 		return
 	}
+
+	id, err := strconv.Atoi(idStr)
+	if err != nil || id <= 0 {
+		writeError(c, http.StatusBadRequest, 1, "invalid id")
+		return
+	}
+
+	err = h.favoriteRepo.DeleteFavorite(id)
+	if err != nil {
+		writeError(c, http.StatusInternalServerError, 500, err.Error())
+		return
+	}
+
 	writeOK(c, gin.H{"deleted": true})
 }
 
-// ListTags 标签列表
+// ========================================
+// 标签管理相关 Handler
+// ========================================
+
+// ListTags 获取所有标签
+// GET /api/v1/tags
 func (h *Handler) ListTags(c *gin.Context) {
+	tags, err := h.tagRepo.ListTags()
+	if err != nil {
+		writeError(c, http.StatusInternalServerError, 500, err.Error())
+		return
+	}
+
 	writeOK(c, gin.H{
-		"items": []gin.H{
-			{"id": 1, "name": "监控", "color": "#3B82F6", "usage_count": 0},
-		},
+		"items": tags,
 	})
 }
 
-// CreateTag 创建标签
+// CreateTag 创建新标签
+// POST /api/v1/tags
 func (h *Handler) CreateTag(c *gin.Context) {
 	var req struct {
 		Name  string `json:"name"`
@@ -269,14 +409,25 @@ func (h *Handler) CreateTag(c *gin.Context) {
 		writeError(c, http.StatusBadRequest, 1, "invalid request body")
 		return
 	}
-	if strings.TrimSpace(req.Name) == "" {
+	req.Name = strings.TrimSpace(req.Name)
+	req.Color = strings.TrimSpace(req.Color)
+
+	if req.Name == "" {
 		writeError(c, http.StatusBadRequest, 1, "name required")
 		return
 	}
-	writeOK(c, gin.H{"id": 1, "name": req.Name, "color": req.Color})
+
+	tag, err := h.tagRepo.CreateTag(req.Name, req.Color)
+	if err != nil {
+		writeError(c, http.StatusInternalServerError, 500, err.Error())
+		return
+	}
+
+	writeOK(c, tag)
 }
 
-// AddConversationTag 单个添加
+// AddConversationTag 为对话添加单个标签
+// POST /api/v1/conversation-tags
 func (h *Handler) AddConversationTag(c *gin.Context) {
 	var req struct {
 		TagID            int    `json:"tag_id"`
@@ -286,14 +437,28 @@ func (h *Handler) AddConversationTag(c *gin.Context) {
 		writeError(c, http.StatusBadRequest, 1, "invalid request body")
 		return
 	}
-	if req.TagID <= 0 || strings.TrimSpace(req.ConversationUUID) == "" {
+	req.ConversationUUID = strings.TrimSpace(req.ConversationUUID)
+
+	if req.TagID <= 0 || req.ConversationUUID == "" {
 		writeError(c, http.StatusBadRequest, 1, "tag_id and conversation_uuid required")
 		return
 	}
-	writeOK(c, gin.H{"tag_id": req.TagID, "conversation_uuid": req.ConversationUUID})
+
+	err := h.tagRepo.AddConversationTag(req.TagID, req.ConversationUUID)
+	if err != nil {
+		writeError(c, http.StatusInternalServerError, 500, err.Error())
+		return
+	}
+
+	writeOK(c, gin.H{
+		"tag_id":            req.TagID,
+		"conversation_uuid": req.ConversationUUID,
+		"created_at":        nowRFC3339(),
+	})
 }
 
-// BatchAddConversationTags 批量添加标签
+// BatchAddConversationTags 批量为对话添加标签
+// POST /api/v1/conversation-tags/batch-add
 func (h *Handler) BatchAddConversationTags(c *gin.Context) {
 	var req struct {
 		ConversationUUID string `json:"conversation_uuid"`
@@ -303,17 +468,28 @@ func (h *Handler) BatchAddConversationTags(c *gin.Context) {
 		writeError(c, http.StatusBadRequest, 1, "invalid request body")
 		return
 	}
-	if strings.TrimSpace(req.ConversationUUID) == "" || len(req.TagIDs) == 0 {
+	req.ConversationUUID = strings.TrimSpace(req.ConversationUUID)
+
+	if req.ConversationUUID == "" || len(req.TagIDs) == 0 {
 		writeError(c, http.StatusBadRequest, 1, "conversation_uuid and tag_ids required")
 		return
 	}
+
+	err := h.tagRepo.BatchAddConversationTags(req.ConversationUUID, req.TagIDs)
+	if err != nil {
+		writeError(c, http.StatusInternalServerError, 500, err.Error())
+		return
+	}
+
 	writeOK(c, gin.H{
 		"conversation_uuid": req.ConversationUUID,
 		"tag_ids":           req.TagIDs,
+		"added_at":          nowRFC3339(),
 	})
 }
 
-// BatchRemoveConversationTags 批量删除标签
+// BatchRemoveConversationTags 批量移除对话的标签
+// POST /api/v1/conversation-tags/batch-remove
 func (h *Handler) BatchRemoveConversationTags(c *gin.Context) {
 	var req struct {
 		ConversationUUID string `json:"conversation_uuid"`
@@ -323,62 +499,117 @@ func (h *Handler) BatchRemoveConversationTags(c *gin.Context) {
 		writeError(c, http.StatusBadRequest, 1, "invalid request body")
 		return
 	}
-	if strings.TrimSpace(req.ConversationUUID) == "" || len(req.TagIDs) == 0 {
+	req.ConversationUUID = strings.TrimSpace(req.ConversationUUID)
+
+	if req.ConversationUUID == "" || len(req.TagIDs) == 0 {
 		writeError(c, http.StatusBadRequest, 1, "conversation_uuid and tag_ids required")
 		return
 	}
+
+	err := h.tagRepo.BatchRemoveConversationTags(req.ConversationUUID, req.TagIDs)
+	if err != nil {
+		writeError(c, http.StatusInternalServerError, 500, err.Error())
+		return
+	}
+
 	writeOK(c, gin.H{
 		"conversation_uuid": req.ConversationUUID,
 		"removed_tag_ids":   req.TagIDs,
 	})
 }
 
-// DeleteConversationTag 删除单个标签关联
+// DeleteConversationTag 删除对话和标签的关联
+// DELETE /api/v1/conversation-tags/:id
 func (h *Handler) DeleteConversationTag(c *gin.Context) {
-	if strings.TrimSpace(c.Param("id")) == "" {
+	idStr := strings.TrimSpace(c.Param("id"))
+	if idStr == "" {
 		writeError(c, http.StatusBadRequest, 1, "id required")
 		return
 	}
+
+	id, err := strconv.Atoi(idStr)
+	if err != nil || id <= 0 {
+		writeError(c, http.StatusBadRequest, 1, "invalid id")
+		return
+	}
+
+	err = h.tagRepo.DeleteConversationTag(id)
+	if err != nil {
+		writeError(c, http.StatusInternalServerError, 500, err.Error())
+		return
+	}
+
 	writeOK(c, gin.H{"deleted": true})
 }
 
-// ListTagConversations 标签下的对话列表
+// ListTagConversations 获取标签下的所有对话
+// GET /api/v1/tags/:id/conversations?page=1&page_size=20
 func (h *Handler) ListTagConversations(c *gin.Context) {
-	if strings.TrimSpace(c.Param("id")) == "" {
+	idStr := strings.TrimSpace(c.Param("id"))
+	if idStr == "" {
 		writeError(c, http.StatusBadRequest, 1, "tag id required")
 		return
 	}
+
+	tagID, err := strconv.Atoi(idStr)
+	if err != nil || tagID <= 0 {
+		writeError(c, http.StatusBadRequest, 1, "invalid tag id")
+		return
+	}
+
 	page, pageSize := parsePagination(c)
+
+	conversations, total, err := h.tagRepo.ListTagConversations(tagID, page, pageSize)
+	if err != nil {
+		writeError(c, http.StatusInternalServerError, 500, err.Error())
+		return
+	}
+
 	writeOK(c, gin.H{
-		"items": []gin.H{
-			{"uuid": "conv-demo-1", "title": "示例对话"},
-		},
-		"total":     1,
+		"items":     conversations,
+		"total":     total,
 		"page":      page,
 		"page_size": pageSize,
 	})
 }
 
-// StatsOverview 总览统计
+// ========================================
+// 统计相关 Handler
+// ========================================
+
+// StatsOverview 获取概览统计
+// GET /api/v1/stats/overview
 func (h *Handler) StatsOverview(c *gin.Context) {
-	writeOK(c, gin.H{
-		"total_conversations": 1,
-		"total_messages":      1,
-		"sources": gin.H{
-			"gpt":    1,
-			"claude": 0,
-		},
-	})
+	stats, err := h.statsRepo.GetOverview()
+	if err != nil {
+		writeError(c, http.StatusInternalServerError, 500, err.Error())
+		return
+	}
+
+	writeOK(c, stats)
 }
 
-// StatsByDate 按日期统计
+// StatsByDate 获取按日期统计
+// GET /api/v1/stats/by-date?date_from=2025-01-01&date_to=2025-11-30
 func (h *Handler) StatsByDate(c *gin.Context) {
-	writeOK(c, []gin.H{
-		{"date": "2025-11-20", "count": 1},
-	})
+	dateFrom := strings.TrimSpace(c.Query("date_from"))
+	dateTo := strings.TrimSpace(c.Query("date_to"))
+
+	stats, err := h.statsRepo.GetStatsByDate(dateFrom, dateTo)
+	if err != nil {
+		writeError(c, http.StatusInternalServerError, 500, err.Error())
+		return
+	}
+
+	writeOK(c, stats)
 }
 
-// SyncBatch Worker批量同步
+// ========================================
+// 内部 API Handler (仅供 Worker 调用)
+// ========================================
+
+// SyncBatch Worker 批量同步数据 (TODO: 实现同步逻辑)
+// POST /internal/v1/sync/batch
 func (h *Handler) SyncBatch(c *gin.Context) {
 	var req struct {
 		SourceType    string                   `json:"source_type"`
@@ -396,6 +627,8 @@ func (h *Handler) SyncBatch(c *gin.Context) {
 		writeError(c, http.StatusBadRequest, 1, "conversations required")
 		return
 	}
+
+	// TODO: 实现批量同步逻辑
 	writeOK(c, gin.H{
 		"success":                true,
 		"inserted_conversations": len(req.Conversations),
@@ -405,13 +638,18 @@ func (h *Handler) SyncBatch(c *gin.Context) {
 	})
 }
 
-// parsePagination 解析分页参数，提供默认值
+// ========================================
+// 辅助函数
+// ========================================
+
+// parsePagination 解析分页参数,提供默认值
 func parsePagination(c *gin.Context) (int, int) {
 	page := parsePositiveInt(c.Query("page"), 1)
 	pageSize := parsePositiveInt(c.Query("page_size"), 20)
 	return page, pageSize
 }
 
+// parsePositiveInt 解析正整数,失败则返回默认值
 func parsePositiveInt(val string, def int) int {
 	if val == "" {
 		return def
@@ -422,6 +660,7 @@ func parsePositiveInt(val string, def int) int {
 	return def
 }
 
+// normalizePage 规范化分页参数
 func normalizePage(page, pageSize int) (int, int) {
 	if page <= 0 {
 		page = 1
@@ -432,6 +671,16 @@ func normalizePage(page, pageSize int) (int, int) {
 	return page, pageSize
 }
 
+// timeNowUnix 返回当前 Unix 时间戳(秒)
 func timeNowUnix() int64 {
 	return time.Now().Unix()
+}
+
+// jsonMarshal 序列化对象为JSON字符串
+func jsonMarshal(v interface{}) (string, error) {
+	bytes, err := json.Marshal(v)
+	if err != nil {
+		return "", err
+	}
+	return string(bytes), nil
 }

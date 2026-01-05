@@ -3,7 +3,8 @@
 # JSON Compare 编译和运行脚本
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-BIN_DIR="$SCRIPT_DIR/../bin"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+BIN_DIR="$PROJECT_ROOT/bin"
 
 # 创建bin目录
 mkdir -p "$BIN_DIR"
@@ -16,7 +17,7 @@ fi
 
 # 编译Go程序
 echo "正在编译 compare_json..."
-go build -o "$BIN_DIR/compare_json" "$SCRIPT_DIR/compare_json.go"
+go build -o "$BIN_DIR/compare_json" "$SCRIPT_DIR/go/compare_json.go"
 
 if [ $? -ne 0 ]; then
     echo "编译失败!"

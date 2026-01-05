@@ -9,6 +9,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/google/uuid"
 )
 
 // Codex 数据结构定义
@@ -136,6 +138,29 @@ func readJSONL(filename string) ([]CodexMessage, string, error) {
 	return messages, sessionID, nil
 }
 
+// generateMessageUUID 生成消息的 UUID v5
+// 使用 sessionID 作为命名空间，timestamp + payload JSON 作为名字
+func generateMessageUUID(sessionID, timestamp string, payload *CodexPayload) (string, error) {
+	// 解析 sessionID 为 UUID 作为命名空间
+	namespaceUUID, err := uuid.Parse(sessionID)
+	if err != nil {
+		return "", fmt.Errorf("invalid session ID: %w", err)
+	}
+
+	// 序列化 payload 为 JSON（确保格式稳定）
+	payloadJSON, err := json.Marshal(payload)
+	if err != nil {
+		return "", fmt.Errorf("marshal payload: %w", err)
+	}
+
+	// 拼接 timestamp + payload JSON 作为名字
+	name := timestamp + string(payloadJSON)
+
+	// 生成 UUID v5
+	messageUUID := uuid.NewSHA1(namespaceUUID, []byte(name))
+	return messageUUID.String(), nil
+}
+
 func processConversation(messages []CodexMessage, sessionID string, inputFile string, outputDir string) error {
 	if len(messages) == 0 {
 		return fmt.Errorf("没有有效的消息节点")
@@ -145,7 +170,7 @@ func processConversation(messages []CodexMessage, sessionID string, inputFile st
 	nodes := []OutputNode{}
 	var prevID string
 
-	for idx, msg := range messages {
+	for _, msg := range messages {
 		content := extractContent(msg.Payload)
 
 		// 如果内容为空，跳过
@@ -153,8 +178,11 @@ func processConversation(messages []CodexMessage, sessionID string, inputFile st
 			continue
 		}
 
-		// 生成节点ID（使用索引+时间戳）
-		nodeID := fmt.Sprintf("node_%d_%s", idx, msg.Timestamp)
+		// 使用新的 UUID v5 方案生成节点ID
+		nodeID, err := generateMessageUUID(sessionID, msg.Timestamp, msg.Payload)
+		if err != nil {
+			return fmt.Errorf("generate message UUID: %w", err)
+		}
 
 		parentID := prevID
 		childID := ""
@@ -172,7 +200,7 @@ func processConversation(messages []CodexMessage, sessionID string, inputFile st
 		nodes = append(nodes, node)
 
 		// 更新上一个节点的child_id
-		if idx > 0 && len(nodes) >= 2 {
+		if len(nodes) >= 2 {
 			nodes[len(nodes)-2].ChildID = nodeID
 		}
 

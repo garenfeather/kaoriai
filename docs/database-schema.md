@@ -232,7 +232,8 @@ CREATE INDEX idx_msg_hidden ON messages(hidden_at);
 
 **图片处理:**
 - 图片信息保存在content JSON中(见情况4示例)
-- 图片文件统一存储在 `/data/images/{image_id}.jpg`
+- 图片文件统一存储在 `data/images/` 目录（所有来源的图片存放在同一目录）
+- 文件命名格式: `{image_id}.jpg` 或 `{image_id}.png`
 - 不需要独立images表
 
 ---

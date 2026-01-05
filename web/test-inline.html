@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>内联样式测试</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+</head>
+<body style="padding: 40px; background: #fafafa; font-family: Arial, sans-serif;">
+
+    <h1>语法高亮测试 - 内联样式版本</h1>
+
+    <div style="margin: 20px 0; border: 2px solid red; padding: 20px; background: white;">
+        <h2 style="color: red;">测试代码块</h2>
+        <pre><code class="language-python" id="testCode">def fibonacci(n):
+    """计算斐波那契数列"""
+    if n <= 1:
+        return n
+    return fibonacci(n-1) + fibonacci(n-2)
+
+# 测试
+for i in range(10):
+    print(f"fibonacci({i}) = {fibonacci(i)}")</code></pre>
+    </div>
+
+    <div id="result" style="margin-top: 20px; padding: 20px; background: #f0f0f0; border: 2px solid blue;">
+        <h2 style="color: blue;">检查结果：</h2>
+        <div id="output"></div>
+    </div>
+
+    <script>
+        // 高亮代码
+        const codeBlock = document.getElementById('testCode');
+        hljs.highlightElement(codeBlock);
+
+        // 显示生成的 HTML
+        const output = document.getElementById('output');
+        output.innerHTML = '<h3>生成的 HTML：</h3><pre style="background: white; padding: 10px; overflow-x: auto;">' +
+            codeBlock.innerHTML.replace(/</g, '&lt;').replace(/>/g, '&gt;') +
+            '</pre>';
+
+        // 应用内联样式到每个 span
+        setTimeout(() => {
+            const spans = codeBlock.querySelectorAll('span');
+            let report = '<h3>应用的样式：</h3><ul>';
+
+            spans.forEach((span, index) => {
+                const className = span.className;
+                let color = '#000';
+                let fontWeight = 'normal';
+                let fontStyle = 'normal';
+
+                // 根据类名设置样式
+                if (className.includes('hljs-comment')) {
+                    color = '#666';
+                    fontStyle = 'italic';
+                } else if (className.includes('hljs-keyword') || className.includes('hljs-built_in')) {
+                    color = '#1a1a1a';
+                    fontWeight = '700';
+                } else if (className.includes('hljs-string') || className.includes('hljs-subst')) {
+                    color = '#333';
+                } else if (className.includes('hljs-number')) {
+                    color = '#1a1a1a';
+                    fontWeight = '600';
+                } else if (className.includes('hljs-title')) {
+                    color = '#1a1a1a';
+                    fontWeight = '600';
+                }
+
+                span.style.color = color;
+                span.style.fontWeight = fontWeight;
+                span.style.fontStyle = fontStyle;
+
+                report += `<li>${className}: color=${color}, weight=${fontWeight}, style=${fontStyle}</li>`;
+            });
+
+            report += '</ul>';
+            output.innerHTML += report;
+
+            // 检查实际渲染的颜色
+            output.innerHTML += '<h3>实际渲染检查：</h3>';
+            const comment = codeBlock.querySelector('.hljs-comment');
+            const keyword = codeBlock.querySelector('.hljs-keyword');
+            const string = codeBlock.querySelector('.hljs-string');
+
+            if (comment) {
+                const computedStyle = window.getComputedStyle(comment);
+                output.innerHTML += `<p>注释颜色: ${computedStyle.color} (期望: rgb(102, 102, 102))</p>`;
+            }
+            if (keyword) {
+                const computedStyle = window.getComputedStyle(keyword);
+                output.innerHTML += `<p>关键字颜色: ${computedStyle.color}, 粗细: ${computedStyle.fontWeight}</p>`;
+            }
+            if (string) {
+                const computedStyle = window.getComputedStyle(string);
+                output.innerHTML += `<p>字符串颜色: ${computedStyle.color} (期望: rgb(51, 51, 51))</p>`;
+            }
+        }, 100);
+    </script>
+</body>
+</html>

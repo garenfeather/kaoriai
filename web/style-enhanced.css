@@ -1,0 +1,334 @@
+/* ========================================
+   增强格式展示样式（线框简洁风格）
+   ======================================== */
+
+/* Markdown 内容容器 */
+.markdown-content {
+    line-height: 1.8;
+    color: #1a1a1a;
+}
+
+/* 标题 */
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3,
+.markdown-content h4,
+.markdown-content h5,
+.markdown-content h6 {
+    margin-top: 24px;
+    margin-bottom: 16px;
+    font-weight: 600;
+    line-height: 1.25;
+    color: #1a1a1a;
+}
+
+.markdown-content h1 {
+    font-size: 28px;
+    border-bottom: 1px solid #1a1a1a;
+    padding-bottom: 12px;
+}
+
+.markdown-content h2 {
+    font-size: 24px;
+    border-bottom: 1px solid #1a1a1a;
+    padding-bottom: 8px;
+}
+
+.markdown-content h3 {
+    font-size: 20px;
+}
+
+.markdown-content h4 {
+    font-size: 16px;
+}
+
+/* 段落 */
+.markdown-content p {
+    margin-bottom: 16px;
+}
+
+/* 列表 */
+.markdown-content ul,
+.markdown-content ol {
+    margin: 16px 0;
+    padding-left: 32px;
+}
+
+.markdown-content li {
+    margin: 8px 0;
+}
+
+/* 行内代码 */
+.markdown-content code {
+    padding: 2px 6px;
+    border: 1px solid #1a1a1a;
+    border-radius: 4px;
+    background: transparent;
+    font-family: 'Monaco', 'Consolas', 'Courier New', monospace;
+    font-size: 0.9em;
+    color: #1a1a1a;
+}
+
+/* 引用块 */
+.markdown-content blockquote {
+    margin: 16px 0;
+    padding: 12px 20px;
+    border-left: 3px solid #1a1a1a;
+    background: transparent;
+    color: #1a1a1a;
+}
+
+.markdown-content blockquote p {
+    margin: 0;
+}
+
+/* 分隔线 */
+.markdown-content hr {
+    margin: 24px 0;
+    border: none;
+    border-top: 1px solid #1a1a1a;
+}
+
+/* 链接 */
+.markdown-content a {
+    color: #1a1a1a;
+    text-decoration: underline;
+    transition: opacity 0.2s;
+}
+
+.markdown-content a:hover {
+    opacity: 0.7;
+}
+
+/* ========================================
+   代码块样式（线框简洁风格）
+   ======================================== */
+.code-block {
+    margin: 16px 0;
+    border: 1px solid #1a1a1a;
+    border-radius: 8px;
+    background: transparent;
+    overflow: hidden;
+}
+
+.code-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 16px;
+    border-bottom: 1px solid #1a1a1a;
+    background: transparent;
+}
+
+.code-language {
+    font-size: 12px;
+    font-weight: 600;
+    color: #1a1a1a;
+    text-transform: uppercase;
+}
+
+.code-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.code-btn {
+    padding: 4px 12px;
+    border: 1px solid #1a1a1a;
+    border-radius: 4px;
+    background: transparent;
+    color: #1a1a1a;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.code-btn:hover {
+    background: #1a1a1a;
+    color: white;
+}
+
+.code-content {
+    padding: 16px;
+    overflow-x: auto;
+    background: transparent;
+}
+
+.code-content pre {
+    margin: 0;
+    padding: 0;
+    background: transparent !important;
+}
+
+.code-content code {
+    padding: 0 !important;
+    border: none !important;
+    background: transparent !important;
+    font-family: 'Monaco', 'Consolas', 'Courier New', monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    /* color 由子元素的 hljs-* 类控制，不在这里强制设置 */
+}
+
+/* 代码高亮使用 highlight.js 的默认彩色主题 (github.min.css) */
+/* 只保留必要的布局样式，不覆盖颜色 */
+
+/* 代码折叠状态 */
+.code-block.collapsed .code-content {
+    display: none;
+}
+
+.code-block.collapsed .toggle-btn::before {
+    content: '展开';
+}
+
+.toggle-btn::before {
+    content: '折叠';
+}
+
+/* ========================================
+   表格样式（线框简洁风格）
+   ======================================== */
+.table-wrapper {
+    margin: 16px 0;
+    overflow-x: auto;
+}
+
+.table-wrapper table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid #1a1a1a;
+    background: transparent;
+}
+
+.table-wrapper th,
+.table-wrapper td {
+    padding: 12px 16px;
+    text-align: left;
+    border: 1px solid #1a1a1a;
+    color: #1a1a1a;
+}
+
+.table-wrapper th {
+    font-weight: 600;
+    background: transparent;
+}
+
+.table-wrapper tr:hover {
+    background: rgba(0, 0, 0, 0.02);
+}
+
+/* ========================================
+   Mermaid 图表样式（线框简洁风格）
+   ======================================== */
+.mermaid-block {
+    margin: 16px 0;
+    border: 1px solid #1a1a1a;
+    border-radius: 8px;
+    background: transparent;
+    overflow: hidden;
+}
+
+.mermaid-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 16px;
+    border-bottom: 1px solid #1a1a1a;
+    background: transparent;
+}
+
+.mermaid-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #1a1a1a;
+    text-transform: uppercase;
+}
+
+.mermaid-content {
+    padding: 24px;
+    background: transparent;
+    text-align: center;
+}
+
+.mermaid-content .mermaid {
+    display: inline-block;
+    width: 80%;
+    max-width: 80%;
+}
+
+/* 覆盖 Mermaid 默认样式 */
+.mermaid-content .mermaid svg {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+}
+
+.mermaid-content .mermaid .node rect,
+.mermaid-content .mermaid .node circle,
+.mermaid-content .mermaid .node polygon {
+    fill: transparent !important;
+    stroke: #1a1a1a !important;
+    stroke-width: 1px !important;
+}
+
+.mermaid-content .mermaid .edgePath path {
+    stroke: #1a1a1a !important;
+    stroke-width: 1px !important;
+}
+
+.mermaid-content .mermaid .edgeLabel {
+    background: #fafafa !important;
+    color: #1a1a1a !important;
+}
+
+.mermaid-content .mermaid text {
+    fill: #1a1a1a !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+}
+
+/* Mermaid 折叠状态 */
+.mermaid-block.collapsed .mermaid-content {
+    display: none;
+}
+
+/* ========================================
+   数学公式样式（KaTeX）
+   ======================================== */
+.katex {
+    font-size: 1.1em;
+}
+
+.katex-display {
+    margin: 16px 0;
+    padding: 16px;
+    border: 1px solid #1a1a1a;
+    border-radius: 8px;
+    background: transparent;
+    overflow-x: auto;
+}
+
+/* ========================================
+   响应式设计
+   ======================================== */
+@media (max-width: 768px) {
+    .code-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .code-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .table-wrapper {
+        font-size: 14px;
+    }
+
+    .table-wrapper th,
+    .table-wrapper td {
+        padding: 8px 12px;
+    }
+}

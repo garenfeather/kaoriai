@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>语法高亮测试</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            padding: 40px;
+            background: #fafafa;
+        }
+
+        .code-block {
+            margin: 20px 0;
+            border: 1px solid #1a1a1a;
+            border-radius: 8px;
+            background: transparent;
+        }
+
+        .code-header {
+            padding: 8px 16px;
+            border-bottom: 1px solid #1a1a1a;
+            font-weight: 600;
+        }
+
+        .code-content {
+            padding: 16px;
+            background: transparent;
+        }
+
+        .code-content pre {
+            margin: 0;
+            padding: 0;
+        }
+
+        .code-content code {
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        /* 基础代码样式（不强制颜色，让各个类自己定义） */
+        .code-content code {
+            background: transparent !important;
+        }
+
+        /* 注释 - 灰色斜体 */
+        .code-content .hljs-comment,
+        .code-content .hljs-quote {
+            color: #666 !important;
+            font-style: italic !important;
+        }
+
+        /* 关键字 - 黑色粗体 */
+        .code-content .hljs-keyword,
+        .code-content .hljs-built_in,
+        .code-content .hljs-type {
+            color: #1a1a1a !important;
+            font-weight: 700 !important;
+        }
+
+        /* 字符串 - 深灰色 */
+        .code-content .hljs-string,
+        .code-content .hljs-subst {
+            color: #333 !important;
+        }
+
+        /* 数字 - 黑色加粗 */
+        .code-content .hljs-number {
+            color: #1a1a1a !important;
+            font-weight: 600 !important;
+        }
+
+        /* 函数名 - 黑色加粗 */
+        .code-content .hljs-title,
+        .code-content .hljs-name,
+        .code-content [class*="hljs-title"] {
+            color: #1a1a1a !important;
+            font-weight: 600 !important;
+        }
+
+        /* 参数 - 普通黑色 */
+        .code-content .hljs-params {
+            color: #1a1a1a !important;
+        }
+    </style>
+</head>
+<body>
+    <h1>语法高亮测试</h1>
+
+    <div class="code-block">
+        <div class="code-header">Python 代码</div>
+        <div class="code-content">
+            <pre><code class="language-python">def fibonacci(n):
+    """计算斐波那契数列"""
+    if n <= 1:
+        return n
+    return fibonacci(n-1) + fibonacci(n-2)
+
+# 测试
+for i in range(10):
+    print(f"fibonacci({i}) = {fibonacci(i)}")</code></pre>
+        </div>
+    </div>
+
+    <div id="debug"></div>
+
+    <script>
+        // 高亮所有代码块
+        document.querySelectorAll('pre code').forEach((block) => {
+            hljs.highlightElement(block);
+
+            // 调试：显示生成的 HTML
+            const debug = document.getElementById('debug');
+            debug.innerHTML = '<h2>生成的 HTML 结构：</h2><pre>' +
+                block.innerHTML.replace(/</g, '&lt;').replace(/>/g, '&gt;') +
+                '</pre>';
+        });
+    </script>
+</body>
+</html>

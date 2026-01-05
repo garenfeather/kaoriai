@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>纯色区分测试</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+        body {
+            padding: 40px;
+            background: #fafafa;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        .test-block {
+            margin: 30px 0;
+            border: 1px solid #1a1a1a;
+            padding: 20px;
+            background: white;
+        }
+        h2 {
+            margin-top: 0;
+            font-size: 16px;
+            border-bottom: 1px solid #1a1a1a;
+            padding-bottom: 10px;
+        }
+        .color-legend {
+            margin: 10px 0;
+            font-size: 12px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .color-sample {
+            padding: 3px 8px;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>纯色文字区分测试（无粗体/斜体）</h1>
+
+    <!-- 方案 1 -->
+    <div class="test-block">
+        <h2>方案 1：三级灰度</h2>
+        <div class="color-legend">
+            <span class="color-sample" style="color: #000;">关键字 #000</span>
+            <span class="color-sample" style="color: #555;">字符串 #555</span>
+            <span class="color-sample" style="color: #999;">注释 #999</span>
+            <span class="color-sample" style="color: #222;">函数名 #222</span>
+            <span class="color-sample" style="color: #333;">数字/参数 #333</span>
+        </div>
+        <pre><code class="language-python" id="code1">def fibonacci(n):
+    """计算斐波那契数列"""
+    if n <= 1:
+        return n
+    return fibonacci(n-1) + fibonacci(n-2)
+
+# 测试
+for i in range(10):
+    print(f"fibonacci({i}) = {fibonacci(i)}")</code></pre>
+    </div>
+
+    <!-- 方案 2 -->
+    <div class="test-block">
+        <h2>方案 2：四级灰度（更细致）</h2>
+        <div class="color-legend">
+            <span class="color-sample" style="color: #000;">关键字 #000</span>
+            <span class="color-sample" style="color: #666;">字符串 #666</span>
+            <span class="color-sample" style="color: #aaa;">注释 #aaa</span>
+            <span class="color-sample" style="color: #333;">函数名 #333</span>
+            <span class="color-sample" style="color: #444;">数字 #444</span>
+            <span class="color-sample" style="color: #555;">参数 #555</span>
+        </div>
+        <pre><code class="language-python" id="code2">def fibonacci(n):
+    """计算斐波那契数列"""
+    if n <= 1:
+        return n
+    return fibonacci(n-1) + fibonacci(n-2)
+
+# 测试
+for i in range(10):
+    print(f"fibonacci({i}) = {fibonacci(i)}")</code></pre>
+    </div>
+
+    <!-- 方案 3 -->
+    <div class="test-block">
+        <h2>方案 3：简洁两级（最简单）</h2>
+        <div class="color-legend">
+            <span class="color-sample" style="color: #000;">关键字/函数名/数字 #000</span>
+            <span class="color-sample" style="color: #666;">字符串/参数 #666</span>
+            <span class="color-sample" style="color: #999;">注释 #999</span>
+        </div>
+        <pre><code class="language-python" id="code3">def fibonacci(n):
+    """计算斐波那契数列"""
+    if n <= 1:
+        return n
+    return fibonacci(n-1) + fibonacci(n-2)
+
+# 测试
+for i in range(10):
+    print(f"fibonacci({i}) = {fibonacci(i)}")</code></pre>
+    </div>
+
+    <script>
+        // 方案 1：三级灰度
+        const code1 = document.getElementById('code1');
+        hljs.highlightElement(code1);
+        setTimeout(() => {
+            code1.querySelectorAll('span').forEach(span => {
+                const c = span.className;
+                if (c.includes('hljs-comment')) span.style.color = '#999';
+                else if (c.includes('hljs-keyword') || c.includes('hljs-built_in')) span.style.color = '#000';
+                else if (c.includes('hljs-string') || c.includes('hljs-subst')) span.style.color = '#555';
+                else if (c.includes('hljs-number')) span.style.color = '#333';
+                else if (c.includes('hljs-title')) span.style.color = '#222';
+                else if (c.includes('hljs-params')) span.style.color = '#333';
+            });
+        }, 50);
+
+        // 方案 2：四级灰度
+        const code2 = document.getElementById('code2');
+        hljs.highlightElement(code2);
+        setTimeout(() => {
+            code2.querySelectorAll('span').forEach(span => {
+                const c = span.className;
+                if (c.includes('hljs-comment')) span.style.color = '#aaa';
+                else if (c.includes('hljs-keyword') || c.includes('hljs-built_in')) span.style.color = '#000';
+                else if (c.includes('hljs-string') || c.includes('hljs-subst')) span.style.color = '#666';
+                else if (c.includes('hljs-number')) span.style.color = '#444';
+                else if (c.includes('hljs-title')) span.style.color = '#333';
+                else if (c.includes('hljs-params')) span.style.color = '#555';
+            });
+        }, 50);
+
+        // 方案 3：简洁两级
+        const code3 = document.getElementById('code3');
+        hljs.highlightElement(code3);
+        setTimeout(() => {
+            code3.querySelectorAll('span').forEach(span => {
+                const c = span.className;
+                if (c.includes('hljs-comment')) span.style.color = '#999';
+                else if (c.includes('hljs-keyword') || c.includes('hljs-built_in')) span.style.color = '#000';
+                else if (c.includes('hljs-string') || c.includes('hljs-subst')) span.style.color = '#666';
+                else if (c.includes('hljs-number')) span.style.color = '#000';
+                else if (c.includes('hljs-title')) span.style.color = '#000';
+                else if (c.includes('hljs-params')) span.style.color = '#666';
+            });
+        }, 50);
+    </script>
+</body>
+</html>

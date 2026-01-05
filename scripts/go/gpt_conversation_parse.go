@@ -62,6 +62,7 @@ type OutputNode struct {
 
 // 输出文件结构
 type OutputFile struct {
+	Title      string       `json:"title"`       // 对话标题
 	RoundCount int          `json:"round_count"` // 对话轮数（user/human消息数量）
 	TotalCount int          `json:"total_count"` // 总消息数量
 	ProjectID  string       `json:"project_id,omitempty"`
@@ -132,6 +133,16 @@ func processConversation(conv Conversation, outputDir string) error {
 
 		// 提取消息信息
 		if node.Message != nil {
+			// 跳过system角色的消息
+			if node.Message.Author.Role == "system" {
+				// 移动到父节点
+				if node.Parent == nil || *node.Parent == "" {
+					break
+				}
+				currentID = *node.Parent
+				continue
+			}
+
 			outputNode := extractNode(node)
 
 			// 设置ID
@@ -195,8 +206,15 @@ func processConversation(conv Conversation, outputDir string) error {
 		}
 	}
 
+	// 提取标题
+	title := conv.Title
+	if title == "" {
+		title = extractTitleFromMessages(nodes)
+	}
+
 	// 构建输出文件结构
 	output := OutputFile{
+		Title:      title,
 		RoundCount: roundCount,
 		TotalCount: totalCount,
 		Data:       nodes,
@@ -271,6 +289,20 @@ func extractNode(node MappingNode) OutputNode {
 	output.CreateTime = node.Message.CreateTime
 
 	return output
+}
+
+func extractTitleFromMessages(nodes []OutputNode) string {
+	// 从第一个user消息提取前50字符作为标题
+	for _, node := range nodes {
+		if (node.Role == "user" || node.Role == "human") && node.Content != "" {
+			content := strings.TrimSpace(node.Content)
+			if len(content) > 50 {
+				return content[:50] + "..."
+			}
+			return content
+		}
+	}
+	return "Untitled Conversation"
 }
 
 func sanitizeFilename(name string) string {

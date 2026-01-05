@@ -3,8 +3,9 @@
 # GPT Conversation Parser 编译和运行脚本
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-BIN_DIR="$SCRIPT_DIR/../bin"
-OUTPUT_DIR="$SCRIPT_DIR/../parsed/gpt/conversation"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+BIN_DIR="$PROJECT_ROOT/bin"
+OUTPUT_DIR="$PROJECT_ROOT/parsed/gpt/conversation"
 
 # 创建bin目录
 mkdir -p "$BIN_DIR"
@@ -17,7 +18,7 @@ fi
 
 # 编译Go程序
 echo "正在编译 gpt_conversation_parse..."
-go build -o "$BIN_DIR/gpt_conversation_parse" "$SCRIPT_DIR/gpt_conversation_parse.go"
+go build -o "$BIN_DIR/gpt_conversation_parse" "$SCRIPT_DIR/go/gpt_conversation_parse.go"
 
 if [ $? -ne 0 ]; then
     echo "编译失败!"

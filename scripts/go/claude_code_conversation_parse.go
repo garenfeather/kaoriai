@@ -159,6 +159,11 @@ func processConversation(messages []ClaudeCodeMessage, sessionID string, outputD
 	// 转换为输出格式
 	nodes := []OutputNode{}
 	for _, msg := range messages {
+		// 跳过system角色的消息
+		if msg.Message != nil && msg.Message.Role == "system" {
+			continue
+		}
+
 		contentType, content, toolData := extractContent(msg.Message)
 
 		// 如果内容为空且没有tool_data，跳过

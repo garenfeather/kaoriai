@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>对话详情（增强版） - Session History</title>
+
+    <!-- Highlight.js 代码高亮 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+    <!-- Marked.js Markdown 解析 -->
+    <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
+
+    <!-- KaTeX 数学公式 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+
+    <!-- Mermaid 图表 -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+
+    <!-- 基础样式 + 增强样式 -->
+    <link rel="stylesheet" href="style.css?v=2">
+    <link rel="stylesheet" href="style-enhanced.css?v=2">
+</head>
+<body>
+    <div class="container">
+        <!-- 顶部导航 -->
+        <header class="header">
+            <div class="header-left">
+                <h1 class="logo">Session History</h1>
+                <nav class="nav">
+                    <a href="index.html" class="nav-link">对话</a>
+                    <a href="#" class="nav-link">收藏</a>
+                    <a href="#" class="nav-link">标签</a>
+                </nav>
+            </div>
+            <button class="btn-secondary">设置</button>
+        </header>
+
+        <!-- 主内容区 -->
+        <main class="main">
+            <!-- 返回按钮 -->
+            <div class="back-button">
+                <a href="index.html" class="btn-text">← 返回列表</a>
+            </div>
+
+            <!-- 对话头部信息 -->
+            <div class="detail-header" id="detailHeader">
+                <h1 class="detail-title" id="detailTitle">复杂格式展示测试</h1>
+                <div class="detail-meta">
+                    <span class="meta-item" id="detailSource">来源: web_test</span>
+                    <span class="meta-item" id="detailDate">创建时间: 2025-01-01</span>
+                    <span class="meta-item" id="detailMessages">消息数: 7</span>
+                </div>
+                <div class="detail-tags" id="detailTags">
+                    <span class="detail-tag">测试</span>
+                    <span class="detail-tag">增强格式</span>
+                </div>
+                <div class="detail-actions">
+                    <button class="btn-primary" id="favoriteBtn">收藏</button>
+                    <button class="btn-secondary" id="exportBtn">导出</button>
+                </div>
+            </div>
+
+            <!-- 消息列表 -->
+            <div class="message-list" id="messageList">
+                <!-- 消息将通过 JavaScript 动态加载 -->
+            </div>
+
+            <!-- 加载指示器 -->
+            <div class="loading" id="loading">
+                <div class="loading-spinner"></div>
+                <p>加载消息中...</p>
+            </div>
+        </main>
+
+        <!-- 底部 -->
+        <footer class="footer">
+            <div class="footer-section">
+                <h4>产品</h4>
+                <a href="#">浏览命令</a>
+                <a href="#">热门命令</a>
+                <a href="#">搜索命令</a>
+            </div>
+            <div class="footer-section">
+                <h4>账户</h4>
+                <a href="#">仪表盘</a>
+                <a href="#">设置</a>
+                <a href="#">登录</a>
+            </div>
+            <div class="footer-section">
+                <h4>资源</h4>
+                <a href="#">帮助</a>
+                <a href="#">关于</a>
+                <a href="#">API</a>
+            </div>
+        </footer>
+    </div>
+
+    <script src="markdown-renderer.js"></script>
+    <script src="test-data-loader.js"></script>
+    <script src="detail-enhanced.js"></script>
+</body>
+</html>

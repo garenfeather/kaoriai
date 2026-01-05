@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>对比度增强测试</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+</head>
+<body style="padding: 40px; background: #fafafa; font-family: monospace; font-size: 14px;">
+
+    <h1>增强对比度测试</h1>
+
+    <div style="margin: 20px 0; border: 1px solid #1a1a1a; padding: 20px; background: white;">
+        <pre><code class="language-python" id="testCode">def fibonacci(n):
+    """计算斐波那契数列"""
+    if n <= 1:
+        return n
+    return fibonacci(n-1) + fibonacci(n-2)
+
+# 测试
+for i in range(10):
+    print(f"fibonacci({i}) = {fibonacci(i)}")</code></pre>
+    </div>
+
+    <h2>颜色对比参考：</h2>
+    <div style="display: flex; gap: 20px; margin: 20px 0;">
+        <div>
+            <div style="background: #000; color: white; padding: 10px;">#000 黑色</div>
+            <div style="background: #1a1a1a; color: white; padding: 10px;">#1a1a1a 深黑（关键字）</div>
+            <div style="background: #333; color: white; padding: 10px;">#333 深灰（旧-字符串）</div>
+            <div style="background: #666; color: white; padding: 10px;">#666 中灰（旧-注释）</div>
+            <div style="background: #999; color: white; padding: 10px;">#999 浅灰（新-注释）</div>
+        </div>
+    </div>
+
+    <script>
+        const codeBlock = document.getElementById('testCode');
+        hljs.highlightElement(codeBlock);
+
+        setTimeout(() => {
+            const spans = codeBlock.querySelectorAll('span');
+
+            spans.forEach((span) => {
+                const className = span.className;
+
+                // 增强对比度的颜色方案
+                if (className.includes('hljs-comment')) {
+                    span.style.color = '#999';  // 浅灰色
+                    span.style.fontStyle = 'italic';
+                } else if (className.includes('hljs-keyword') || className.includes('hljs-built_in')) {
+                    span.style.color = '#000';  // 纯黑色
+                    span.style.fontWeight = '700';
+                } else if (className.includes('hljs-string') || className.includes('hljs-subst')) {
+                    span.style.color = '#666';  // 中灰色
+                    span.style.fontStyle = 'italic';  // 添加斜体
+                } else if (className.includes('hljs-number')) {
+                    span.style.color = '#000';  // 纯黑色
+                    span.style.fontWeight = '600';
+                } else if (className.includes('hljs-title')) {
+                    span.style.color = '#000';  // 纯黑色
+                    span.style.fontWeight = '600';
+                } else if (className.includes('hljs-params')) {
+                    span.style.color = '#333';  // 深灰色
+                }
+            });
+        }, 100);
+    </script>
+</body>
+</html>

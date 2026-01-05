@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>对话列表 - Session History</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 顶部导航 -->
+        <header class="header">
+            <div class="header-left">
+                <h1 class="logo">Session History</h1>
+                <nav class="nav">
+                    <a href="#" class="nav-link active">对话</a>
+                    <a href="#" class="nav-link">收藏</a>
+                    <a href="#" class="nav-link">标签</a>
+                </nav>
+            </div>
+            <button class="btn-secondary">设置</button>
+        </header>
+
+        <!-- 主内容区 -->
+        <main class="main">
+            <div class="page-header">
+                <h2 class="page-title">对话命令</h2>
+                <p class="page-subtitle">从这些对话快速下载 Claude 代理命令</p>
+            </div>
+
+            <!-- 搜索栏 -->
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="搜索对话..." class="search-input">
+            </div>
+
+            <!-- 标签过滤器 -->
+            <div class="filter-section">
+                <div class="filter-label">按标签筛选：</div>
+                <div class="tag-filters" id="tagFilters">
+                    <button class="tag-filter active" data-filter="all">全部</button>
+                    <button class="tag-filter" data-filter="gpt">GPT</button>
+                    <button class="tag-filter" data-filter="claude">Claude</button>
+                    <button class="tag-filter" data-filter="claude_code">Claude Code</button>
+                    <button class="tag-filter" data-filter="codex">Codex</button>
+                </div>
+            </div>
+
+            <!-- 统计信息 -->
+            <div class="stats-bar">
+                <span id="totalCount">已找到 38 个对话</span>
+            </div>
+
+            <!-- 对话卡片网格 -->
+            <div class="card-grid" id="cardGrid">
+                <!-- 卡片将通过 JavaScript 动态加载 -->
+            </div>
+
+            <!-- 加载指示器 -->
+            <div class="loading" id="loading">
+                <div class="loading-spinner"></div>
+                <p>加载中...</p>
+            </div>
+
+            <!-- 分页 -->
+            <div class="pagination" id="pagination">
+                <button class="btn-secondary" id="prevPage">上一页</button>
+                <span class="page-info">第 <span id="currentPage">1</span> 页，共 <span id="totalPages">4</span> 页</span>
+                <button class="btn-secondary" id="nextPage">下一页</button>
+            </div>
+        </main>
+
+        <!-- 底部 -->
+        <footer class="footer">
+            <div class="footer-section">
+                <h4>产品</h4>
+                <a href="#">浏览命令</a>
+                <a href="#">热门命令</a>
+                <a href="#">搜索命令</a>
+            </div>
+            <div class="footer-section">
+                <h4>账户</h4>
+                <a href="#">仪表盘</a>
+                <a href="#">设置</a>
+                <a href="#">登录</a>
+            </div>
+            <div class="footer-section">
+                <h4>资源</h4>
+                <a href="#">帮助</a>
+                <a href="#">关于</a>
+                <a href="#">API</a>
+            </div>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

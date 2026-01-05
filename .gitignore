@@ -5,6 +5,7 @@ parsed/
 parsed_conversations/
 output/
 test_output*/
+test_data/
 
 # 图片文件
 *.jpg
@@ -106,3 +107,17 @@ config.toml
 
 # 文档目录（包含私人信息）
 docs/
+
+# ============================================
+# 新增: 系统特定配置
+# ============================================
+config.yaml
+config.local.yaml
+logs/
+data/bleve_index/
+data/images/
+*.backup
+*.old
+
+# 保留示例配置
+!config.yaml.example

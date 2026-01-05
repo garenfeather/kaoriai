@@ -86,23 +86,24 @@ AI对话数据综合管理系统,用于集成和管理多个AI工具的对话历
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐ │
 │  │   Bleve      │  │   SQLite     │  │   Images     │ │
 │  │  (搜索索引)  │  │  (结构化数据) │  │  (本地文件)  │ │
-│  └──────────────┘  └──────────────┘  └──────────────┘ │
-│                                                          │
+│  └──────────────┘  └───────┬──────┘  └──────────────┘ │
+│                            │                            │
 │  Handler → Service → Repository                         │
-└────────────────────┬────────────────────────────────────┘
-                     ▲
-                     │ HTTP/gRPC (内部接口)
-                     │
-┌────────────────────┴────────────────────────────────────┐
+└────────────────────────────┼─────────────────────────────┘
+                             │
+                             │ 直接读写
+                             │
+┌────────────────────────────┼─────────────────────────────┐
 │           Data Sync Workers (独立进程)                   │
-│  ┌──────────────────┐  ┌──────────────────┐            │
-│  │ OpenAI Worker    │  │ Claude Worker    │  ...       │
+│                            │                             │
+│  ┌──────────────────┐  ┌──┴───────────────┐            │
+│  │ GPT Worker       │  │ Claude Worker    │  ...       │
 │  │ (邮件监听)       │  │ (文件监听)       │            │
 │  └──────────────────┘  └──────────────────┘            │
 │                                                          │
 │  - 数据采集                                              │
-│  - 格式解析(复用scripts下的parsers)                      │
-│  - 批量上传到API Server                                  │
+│  - 格式解析(集成scripts下parsers逻辑)                    │
+│  - 直接写入SQLite数据库                                  │
 └─────────────────────────────────────────────────────────┘
 ```
 
@@ -112,20 +113,19 @@ AI对话数据综合管理系统,用于集成和管理多个AI工具的对话历
 /opt/conversation-manager/
 ├── bin/
 │   ├── api-server              # API服务主程序
-│   ├── openai-sync-worker      # GPT数据同步Worker
-│   ├── claude-sync-worker      # Claude数据同步Worker
-│   └── codex-sync-worker       # Codex数据同步Worker
+│   ├── gpt_worker              # GPT数据同步Worker
+│   └── claude_code_worker      # Claude Code数据同步Worker
 │
 ├── data/
 │   ├── conversation.db         # SQLite数据库
+│   ├── original/               # 原始数据文件
+│   │   ├── gpt/               # GPT邮件下载的ZIP包
+│   │   ├── claude/            # Claude原始JSON
+│   │   └── ...
 │   ├── bleve_index/            # Bleve索引目录
 │   │   ├── index_meta.json
 │   │   └── store/              # BadgerDB存储
-│   └── images/                 # 图片本地存储
-│       ├── gpt/
-│       ├── claude/
-│       ├── claude_code/
-│       └── codex/
+│   └── images/                 # 图片本地存储（所有来源统一存放）
 │
 ├── config/
 │   └── config.yaml             # 配置文件
@@ -156,7 +156,7 @@ AI对话数据综合管理系统,用于集成和管理多个AI工具的对话历
 │  ┌────────────────────────────────────┐ │
 │  │  Sync Workers (后台进程)           │ │
 │  │  - 定时检查数据源                   │ │
-│  │  - 解析并上传到API Server          │ │
+│  │  - 解析并直接写入SQLite             │ │
 │  └────────────────────────────────────┘ │
 │                                          │
 │  /opt/conversation-manager/data/        │
@@ -183,37 +183,34 @@ AI对话数据综合管理系统,用于集成和管理多个AI工具的对话历
 ┌─────────────────┐
 │ Sync Worker     │
 │ 1. 监听/定时    │
-│ 2. 计算MD5      │
-│ 3. 检查变更     │
+│ 2. 下载数据     │
+│ 3. 计算MD5      │
+│ 4. 检查变更     │
 └────────┬────────┘
          │
          ▼
 ┌─────────────────┐
-│ Parser          │
-│ (复用scripts)   │
+│ 内置Parser      │
+│ (集成scripts    │
+│  解析逻辑)      │
 │ - 解析JSON      │
 │ - 提取字段      │
+│ - 处理图片      │
 └────────┬────────┘
          │
          ▼
 ┌─────────────────┐
-│ API Server      │
-│ POST /internal/ │
-│     sync/batch  │
-└────────┬────────┘
-         │
-    ┌────┴────┐
-    ▼         ▼
-┌────────┐ ┌──────┐
-│ SQLite │ │Bleve │
-│ 写入   │ │索引  │
-└────────┘ └──────┘
+│ 直接写入数据库  │
+│ - SQLite写入    │
+│ - Bleve索引     │
+│ (Worker内集成)  │
+└─────────────────┘
 ```
 
 **关键点:**
-1. Worker独立于API Server,解耦数据采集和服务
-2. 通过MD5检查避免重复处理
-3. SQLite和Bleve同步写入,保持一致性
+1. Worker直接写入SQLite,无需通过API Server
+2. 通过ZIP文件MD5检查避免重复处理
+3. Worker内部集成Parser逻辑,不调用外部脚本
 4. 仅索引assistant的文字回复到Bleve
 
 ### 4.2 搜索查询流程
@@ -514,44 +511,6 @@ GET    /api/v1/stats/overview
 GET    /api/v1/stats/by-date
        查询参数: date_from, date_to
        响应: 按日期统计的消息数量
-```
-
-### 5.3 内部API(仅供Worker调用)
-
-```
-POST   /internal/v1/sync/batch
-       请求头: Authorization: Bearer <worker_token>
-       请求:
-       {
-         "source_type": "gpt",
-         "conversations": [
-           {
-             "uuid": "xxx-xxx",
-             "title": "...",
-             "metadata": {...},
-             "messages": [
-               {
-                 "uuid": "msg-1",
-                 "parent_uuid": "",
-                 "round_index": 1,          // round序号
-                 "role": "user",
-                 "content_type": "text",
-                 "content": {...},
-                 "created_at": "2025-11-20T10:00:00Z"
-               }
-             ]
-           }
-         ]
-       }
-
-       响应:
-       {
-         "success": true,
-         "inserted_conversations": 1,
-         "inserted_messages": 2,
-         "updated_conversations": 0,
-         "updated_messages": 0
-       }
 ```
 
 ---

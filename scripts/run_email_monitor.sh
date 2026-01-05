@@ -3,7 +3,8 @@
 # OpenAI 邮件监控编译和运行脚本
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-BIN_DIR="$SCRIPT_DIR/../bin"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+BIN_DIR="$PROJECT_ROOT/bin"
 
 # 创建bin目录
 mkdir -p "$BIN_DIR"
@@ -16,7 +17,7 @@ fi
 
 # 整理依赖
 echo "正在整理依赖..."
-cd "$SCRIPT_DIR"
+cd "$SCRIPT_DIR/go"
 go mod tidy
 
 if [ $? -ne 0 ]; then
@@ -26,7 +27,7 @@ fi
 
 # 编译Go程序
 echo "正在编译 openai_email_monitor..."
-go build -o "$BIN_DIR/openai_email_monitor" "$SCRIPT_DIR/openai_email_monitor.go"
+go build -o "$BIN_DIR/openai_email_monitor" "$SCRIPT_DIR/go/openai_email_monitor.go"
 
 if [ $? -ne 0 ]; then
     echo "编译失败!"

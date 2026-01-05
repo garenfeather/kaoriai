@@ -49,6 +49,7 @@ type OutputNode struct {
 
 // 输出文件结构
 type OutputFile struct {
+	Title      string       `json:"title"`       // 对话标题
 	RoundCount int          `json:"round_count"` // 对话轮数（user/human消息数量）
 	TotalCount int          `json:"total_count"` // 总消息数量
 	ProjectID  string       `json:"project_id,omitempty"`
@@ -110,12 +111,18 @@ func processConversation(conv ClaudeConversation, outputDir string) error {
 	nodes := []OutputNode{}
 	var prevID string
 
-	for idx, msg := range conv.ChatMessages {
+	for _, msg := range conv.ChatMessages {
+		// 跳过system角色的消息
+		role := mapSenderToRole(msg.Sender)
+		if role == "system" {
+			continue
+		}
+
 		node := OutputNode{
 			ID:          msg.UUID,
 			ParentID:    prevID,
 			ChildID:     "",
-			Role:        mapSenderToRole(msg.Sender),
+			Role:        role,
 			ContentType: "text",
 			Content:     extractTextContent(msg.Content),
 			CreateTime:  &msg.CreatedAt,
@@ -130,8 +137,8 @@ func processConversation(conv ClaudeConversation, outputDir string) error {
 		nodes = append(nodes, node)
 
 		// 更新上一个节点的child_id
-		if idx > 0 {
-			nodes[idx-1].ChildID = msg.UUID
+		if len(nodes) > 1 {
+			nodes[len(nodes)-2].ChildID = msg.UUID
 		}
 
 		prevID = msg.UUID
@@ -156,8 +163,18 @@ func processConversation(conv ClaudeConversation, outputDir string) error {
 		}
 	}
 
+	// 提取标题
+	title := conv.Name
+	if title == "" {
+		title = conv.Summary
+	}
+	if title == "" {
+		title = extractTitleFromMessages(nodes)
+	}
+
 	// 构建输出文件结构
 	output := OutputFile{
+		Title:      title,
 		RoundCount: roundCount,
 		TotalCount: totalCount,
 		Data:       nodes,
@@ -204,6 +221,20 @@ func extractImages(contents []ClaudeContent) []string {
 	// Claude 数据格式中图片可能在content中，这里预留扩展
 	// 根据实际数据格式调整
 	return images
+}
+
+func extractTitleFromMessages(nodes []OutputNode) string {
+	// 从第一个user消息提取前50字符作为标题
+	for _, node := range nodes {
+		if (node.Role == "user" || node.Role == "human") && node.Content != "" {
+			content := strings.TrimSpace(node.Content)
+			if len(content) > 50 {
+				return content[:50] + "..."
+			}
+			return content
+		}
+	}
+	return "Untitled Conversation"
 }
 
 func sanitizeFilename(name string) string {

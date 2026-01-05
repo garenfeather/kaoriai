@@ -1,0 +1,94 @@
+# AI对话数据管理系统 - 配置文件示例
+# 复制此文件为 config.yaml 并根据需要修改
+
+# 服务器配置
+server:
+  host: "0.0.0.0"
+  port: 8080
+  mode: "debug"  # debug | release
+  read_timeout: 30s
+  write_timeout: 30s
+  max_header_bytes: 1048576  # 1MB
+
+# 数据库配置
+database:
+  sqlite_path: "./data/conversation.db"
+  pragma:
+    journal_mode: "WAL"
+    synchronous: "NORMAL"
+    cache_size: -64000
+    temp_store: "MEMORY"
+    foreign_keys: true
+
+# Bleve 搜索引擎配置
+search:
+  index_path: "./data/bleve_index"
+  store_type: "badger"
+  batch_size: 1000
+  default_page_size: 20
+  max_page_size: 100
+  highlight_pre: "<mark>"
+  highlight_post: "</mark>"
+
+# 数据源配置
+sources:
+  data_dir: "./data"
+  enabled:
+    - gpt
+    - claude
+    - claude_code
+    - codex
+    - gemini
+    - gemini_cli
+  images_dir: "./data/images"
+
+# 安全配置
+security:
+  # IMPORTANT: 生产环境请修改此 Token
+  auth_token: "your-secret-token-change-me-in-production"
+  cors:
+    enabled: true
+    allow_origins:
+      - "*"  # 生产环境请修改为具体域名
+    allow_methods:
+      - GET
+      - POST
+      - PUT
+      - PATCH
+      - DELETE
+      - OPTIONS
+    allow_headers:
+      - Origin
+      - Content-Type
+      - Authorization
+    expose_headers:
+      - Content-Length
+    allow_credentials: true
+    max_age: 86400
+
+# 日志配置
+logging:
+  level: "info"
+  format: "json"
+  output: "stdout"
+  file_path: "./logs/app.log"
+  max_size: 100
+  max_backups: 5
+  max_age: 30
+  compress: true
+
+# Worker 配置
+workers:
+  worker_token: "worker-secret-token-change-me"
+  sync_interval: "5m"
+  batch_size: 100
+
+# 性能优化
+performance:
+  cache:
+    enabled: true
+    max_age: 300
+  db_pool:
+    max_open_conns: 25
+    max_idle_conns: 5
+    conn_max_lifetime: "1h"
