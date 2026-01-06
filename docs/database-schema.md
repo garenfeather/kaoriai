@@ -207,17 +207,28 @@ CREATE INDEX idx_msg_hidden ON messages(hidden_at);
 }
 ```
 
-**情况4: 包含图片(GPT)**
+**情况4: 包含图片(GPT, content_type=text/multipart)**
 ```json
 {
-  "type": "text",
-  "parts": [
-    "这是一张架构图",
-    {
-      "content_type": "image_asset_pointer",
-      "asset_pointer": "file-abc123xyz"
-    }
-  ]
+  "text": "这是一张架构图，请帮我分析",
+  "images": ["file-abc123xyz-sanitized", "file-def456"]
+}
+```
+
+**情况5: 包含视频(Gemini, content_type=text/multipart/video)**
+```json
+{
+  "text": "你觉得她唱歌时位置偏低还是偏高",
+  "videos": ["c8d0a41aba76e19e-nadojoa22 2026-01-04T095204.mp4"]
+}
+```
+
+**情况6: 同时包含图片和视频(Gemini)**
+```json
+{
+  "text": "分析这些素材",
+  "images": ["image1.jpg", "image2.png"],
+  "videos": ["conversation-id-video1.mov", "conversation-id-video2.mp4"]
 }
 ```
 
@@ -226,15 +237,21 @@ CREATE INDEX idx_msg_hidden ON messages(hidden_at);
 - `conversation_uuid`: 外键关联conversations表
 - `round_index` (round序号): 一问一答算一轮,便于查询上下文
 - `parent_uuid`: 支持分支对话,构建对话树
-- `content_type`: 实际存在的类型为 text | tool_use | tool_result | multipart
-- `content`: 完整保存原始结构,前端可直接解析渲染；全文索引用的纯文本在索引阶段从content实时提取（不落库）
+- `content_type`: 实际存在的类型为 text | tool_use | tool_result | multipart | image | video
+- `content`: 简化后的JSON格式，包含text、images、videos字段；全文索引用的纯文本在索引阶段从content实时提取（不落库）
 - `hidden_at`: 隐藏功能,NULL表示未隐藏,NOT NULL表示已隐藏
 
-**图片处理:**
-- 图片信息保存在content JSON中(见情况4示例)
-- 图片文件统一存储在 `data/images/` 目录（所有来源的图片存放在同一目录）
-- 文件命名格式: `{image_id}.jpg` 或 `{image_id}.png`
-- 不需要独立images表
+**多媒体文件处理:**
+- **图片** (GPT/Gemini支持):
+  - 文件存储在 `data/images/` 目录
+  - content JSON中的 `images` 字段存储文件名数组
+  - 文件名格式: `{image_id}.jpg` 或从URL提取的名称
+- **视频** (仅Gemini支持):
+  - 文件存储在 `data/videos/` 目录
+  - content JSON中的 `videos` 字段存储文件名数组
+  - 文件名格式: `{conversation_id}-{original_filename}`
+- 所有来源的图片统一存放在 `data/images/`，视频统一存放在 `data/videos/`
+- 不需要独立的images/videos表
 
 ---
 
