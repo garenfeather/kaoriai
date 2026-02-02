@@ -36,11 +36,17 @@ func main() {
 		log.Fatalf("Failed to get absolute path for temp dir: %v", err)
 	}
 
+	// failedDir: default under data root (sibling of original/)
+	// If dataDir is .../data/original/codex, data root is .../data
+	dataRoot := filepath.Dir(filepath.Dir(absDataDir))
+	absFailedDir := filepath.Join(dataRoot, "failed", "codex")
+
 	// 创建Worker配置
 	config := &codex.Config{
 		DBPath:          absDBPath,
 		OriginalDataDir: absDataDir,
 		TempDir:         absTempDir,
+		FailedDataDir:   absFailedDir,
 		CheckInterval:   *checkInterval,
 	}
 
@@ -48,6 +54,7 @@ func main() {
 	log.Printf("Database: %s", config.DBPath)
 	log.Printf("Data directory: %s", config.OriginalDataDir)
 	log.Printf("Temp directory: %s", config.TempDir)
+	log.Printf("Failed directory (auto): %s", config.FailedDataDir)
 	log.Printf("Check interval: %v", config.CheckInterval)
 
 	// 创建Worker

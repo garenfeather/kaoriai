@@ -12,6 +12,49 @@ import (
 	"time"
 )
 
+// CopyFile copies a file to destPath (overwriting if exists).
+func CopyFile(srcPath, destPath string) error {
+	src, err := os.Open(srcPath)
+	if err != nil {
+		return err
+	}
+	defer src.Close()
+
+	if err := os.MkdirAll(filepath.Dir(destPath), 0755); err != nil {
+		return err
+	}
+
+	dst, err := os.OpenFile(destPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
+	if err != nil {
+		return err
+	}
+	defer dst.Close()
+
+	_, err = io.Copy(dst, src)
+	return err
+}
+
+// BackupFailedJSONL copies the jsonl file to failedDir.
+// It does not modify the original jsonl.
+//
+// Note: we intentionally do NOT write any sidecar/reason file; the caller should log the reason.
+func BackupFailedJSONL(jsonlPath, failedDir string) error {
+	base := filepath.Base(jsonlPath)
+	destPath := filepath.Join(failedDir, base)
+
+	// Avoid overwrite if a file with the same name already exists.
+	if _, err := os.Stat(destPath); err == nil {
+		ts := time.Now().Format("2006-01-02_15-04-05")
+		destPath = filepath.Join(failedDir, base+"."+ts)
+	}
+
+	if err := CopyFile(jsonlPath, destPath); err != nil {
+		return fmt.Errorf("copy jsonl: %w", err)
+	}
+
+	return nil
+}
+
 // CalculateFileMD5 计算文件 MD5
 func CalculateFileMD5(filePath string) (string, error) {
 	file, err := os.Open(filePath)

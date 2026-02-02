@@ -31,6 +31,7 @@ type Config struct {
 	// 目录配置
 	OriginalDataDir string // 原始ZIP保存目录: data/original/codex
 	TempDir         string // 临时解压目录
+	FailedDataDir   string // 失败/跳过的 jsonl 备份目录: data/failed/codex
 
 	// Worker配置
 	CheckInterval time.Duration // 检查间隔
@@ -60,6 +61,7 @@ func NewWorker(config *Config) (*Worker, error) {
 	dirs := []string{
 		config.OriginalDataDir,
 		config.TempDir,
+		config.FailedDataDir,
 	}
 	for _, dir := range dirs {
 		if err := os.MkdirAll(dir, 0755); err != nil {
@@ -307,12 +309,24 @@ func (w *Worker) processJSONLFiles(jsonlFiles []string) (int, error) {
 		// 解析 JSONL 文件
 		conv, err := ParseJSONLFile(jsonlPath)
 		if err != nil {
+			// parse 失败：备份一份 jsonl 到 failedDir（不影响 zip 删除）
+			_ = BackupFailedJSONL(jsonlPath, w.config.FailedDataDir)
 			log.Printf("[%s] Error parsing %s: %v", w.status.Name, jsonlPath, err)
+			continue
+		}
+
+		// 校验对话是否有效（例如：只有 user 没有 assistant）
+		if ok, reason := ValidateConversation(conv); !ok {
+			// skip：也备份一份 jsonl 到 failedDir
+			_ = BackupFailedJSONL(jsonlPath, w.config.FailedDataDir)
+			log.Printf("[%s] Skip invalid conversation %s from %s: %s", w.status.Name, conv.SessionID, jsonlPath, reason)
 			continue
 		}
 
 		// 写入数据库
 		if err := w.syncToDatabase(conv); err != nil {
+			// sync 失败：备份一份 jsonl 到 failedDir
+			_ = BackupFailedJSONL(jsonlPath, w.config.FailedDataDir)
 			log.Printf("[%s] Error syncing conversation %s: %v", w.status.Name, conv.SessionID, err)
 			continue
 		}
