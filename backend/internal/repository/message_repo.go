@@ -34,7 +34,7 @@ func (r *MessageRepository) ListConversationMessages(conversationUUID string, pa
 	// 查询消息列表
 	query := `
 		SELECT uuid, conversation_uuid, parent_uuid, round_index,
-		       role, content_type, content, created_at, hidden_at
+		       role, content_type, content, thinking, model, created_at, hidden_at
 		FROM messages
 		WHERE conversation_uuid = ? AND hidden_at IS NULL
 		ORDER BY round_index, created_at
@@ -53,7 +53,7 @@ func (r *MessageRepository) ListConversationMessages(conversationUUID string, pa
 		var m model.Message
 		err := rows.Scan(
 			&m.UUID, &m.ConversationUUID, &m.ParentUUID, &m.RoundIndex,
-			&m.Role, &m.ContentType, &m.Content, &m.CreatedAt, &m.HiddenAt,
+			&m.Role, &m.ContentType, &m.Content, &m.Thinking, &m.Model, &m.CreatedAt, &m.HiddenAt,
 		)
 		if err != nil {
 			return nil, 0, fmt.Errorf("解析消息数据失败: %w", err)
@@ -68,7 +68,7 @@ func (r *MessageRepository) ListConversationMessages(conversationUUID string, pa
 func (r *MessageRepository) GetMessage(uuid string) (*model.Message, error) {
 	query := `
 		SELECT uuid, conversation_uuid, parent_uuid, round_index,
-		       role, content_type, content, created_at, hidden_at
+		       role, content_type, content, thinking, model, created_at, hidden_at
 		FROM messages
 		WHERE uuid = ? AND hidden_at IS NULL
 	`
@@ -76,7 +76,7 @@ func (r *MessageRepository) GetMessage(uuid string) (*model.Message, error) {
 	var m model.Message
 	err := r.db.QueryRow(query, uuid).Scan(
 		&m.UUID, &m.ConversationUUID, &m.ParentUUID, &m.RoundIndex,
-		&m.Role, &m.ContentType, &m.Content, &m.CreatedAt, &m.HiddenAt,
+		&m.Role, &m.ContentType, &m.Content, &m.Thinking, &m.Model, &m.CreatedAt, &m.HiddenAt,
 	)
 
 	if err == sql.ErrNoRows {
@@ -106,7 +106,7 @@ func (r *MessageRepository) GetMessageContext(uuid string, before, after int) ([
 	// 查询上下文消息
 	query := `
 		SELECT uuid, conversation_uuid, parent_uuid, round_index,
-		       role, content_type, content, created_at, hidden_at
+		       role, content_type, content, thinking, model, created_at, hidden_at
 		FROM messages
 		WHERE conversation_uuid = ?
 		  AND round_index BETWEEN ? AND ?
@@ -131,7 +131,7 @@ func (r *MessageRepository) GetMessageContext(uuid string, before, after int) ([
 		var m model.Message
 		err := rows.Scan(
 			&m.UUID, &m.ConversationUUID, &m.ParentUUID, &m.RoundIndex,
-			&m.Role, &m.ContentType, &m.Content, &m.CreatedAt, &m.HiddenAt,
+			&m.Role, &m.ContentType, &m.Content, &m.Thinking, &m.Model, &m.CreatedAt, &m.HiddenAt,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("解析消息数据失败: %w", err)

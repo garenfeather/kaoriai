@@ -17,10 +17,12 @@ type GeminiConversation struct {
 
 // GeminiMessage Gemini消息
 type GeminiMessage struct {
-	Role        string        `json:"role"`
-	ContentType string        `json:"content_type"`
-	Content     string        `json:"content"`
-	Files       []GeminiFile  `json:"files,omitempty"`
+	Role         string       `json:"role"`
+	ContentType  string       `json:"content_type"`
+	Content      string       `json:"content"`
+	Files        []GeminiFile `json:"files,omitempty"`
+	ModelThoughts string       `json:"model_thoughts,omitempty"` // 模型思考过程
+	Model        string       `json:"model,omitempty"`          // 模型名称
 }
 
 // GeminiFile Gemini文件（图片或视频）
@@ -50,6 +52,8 @@ type ParsedMessage struct {
 	ContentText   string
 	ContentImages []string
 	ContentVideos []string
+	Thinking      string    // 思考过程（仅assistant消息）
+	Model         string    // 模型名称（仅assistant消息）
 	CreatedAt     time.Time
 }
 
@@ -125,6 +129,8 @@ func parseConversation(geminiConv GeminiConversation, conversationID string) (*P
 			ContentText:   text,
 			ContentImages: images,
 			ContentVideos: videos,
+			Thinking:      msg.ModelThoughts, // 思考过程（assistant消息可能包含）
+			Model:         msg.Model,         // 模型名称（assistant消息可能包含）
 			CreatedAt:     now.Add(time.Duration(i) * time.Second), // 模拟时间递增
 		}
 

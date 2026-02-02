@@ -144,6 +144,8 @@ CREATE TABLE messages (
     role TEXT NOT NULL,                         -- user|assistant|system
     content_type TEXT NOT NULL,                 -- text|tool_use|tool_result|multipart
     content TEXT NOT NULL,                      -- JSON格式完整内容
+    thinking TEXT,                              -- 思考过程(仅Gemini等支持,assistant消息)
+    model TEXT,                                 -- 模型名称(如gemini-1.5-pro、gpt-4o等)
 
     -- 时间戳
     created_at DATETIME NOT NULL,
@@ -239,6 +241,8 @@ CREATE INDEX idx_msg_hidden ON messages(hidden_at);
 - `parent_uuid`: 支持分支对话,构建对话树
 - `content_type`: 实际存在的类型为 text | tool_use | tool_result | multipart | image | video
 - `content`: 简化后的JSON格式，包含text、images、videos字段；全文索引用的纯文本在索引阶段从content实时提取（不落库）
+- `thinking`: 模型思考过程的纯文本记录，仅部分来源（如Gemini）的assistant消息包含此字段，NULL表示无thinking数据
+- `model`: 生成该消息的模型名称（如gemini-1.5-pro、gemini-2.0-flash-exp、gpt-4o等），主要用于assistant消息，便于按模型统计和筛选，NULL表示未记录模型信息
 - `hidden_at`: 隐藏功能,NULL表示未隐藏,NOT NULL表示已隐藏
 
 **多媒体文件处理:**
@@ -533,6 +537,8 @@ CREATE TABLE IF NOT EXISTS messages (
     role TEXT NOT NULL,
     content_type TEXT NOT NULL,
     content TEXT NOT NULL,
+    thinking TEXT,
+    model TEXT,
     created_at DATETIME NOT NULL,
     hidden_at DATETIME,
     FOREIGN KEY (conversation_uuid) REFERENCES conversations(uuid) ON DELETE CASCADE

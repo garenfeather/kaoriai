@@ -53,6 +53,8 @@ CREATE TABLE IF NOT EXISTS messages (
     role TEXT NOT NULL,
     content_type TEXT NOT NULL,
     content TEXT NOT NULL,
+    thinking TEXT,
+    model TEXT,
     created_at DATETIME NOT NULL,
     hidden_at DATETIME,
     FOREIGN KEY (conversation_uuid) REFERENCES conversations(uuid) ON DELETE CASCADE

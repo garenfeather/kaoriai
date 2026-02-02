@@ -394,7 +394,7 @@ func (w *Worker) syncToDatabase(conv *ParsedConversation) error {
 		}
 
 		err = w.db.InsertMessageTx(tx, msg.UUID, conv.UUID, msg.ParentUUID,
-			msg.RoundIndex, msg.Role, msg.ContentType, contentJSON, msg.CreatedAt)
+			msg.RoundIndex, msg.Role, msg.ContentType, contentJSON, msg.Thinking, msg.Model, msg.CreatedAt)
 		if err != nil {
 			log.Printf("[%s] Error insert message %s: %v", w.status.Name, msg.UUID, err)
 			continue

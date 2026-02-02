@@ -26,6 +26,8 @@ type Message struct {
 	Role             string         `json:"role"`              // user|assistant|system
 	ContentType      string         `json:"content_type"`      // text|tool_use|tool_result|multipart
 	Content          string         `json:"content"`           // JSON格式完整内容
+	Thinking         sql.NullString `json:"thinking"`          // 思考过程(仅部分来源如Gemini)
+	Model            sql.NullString `json:"model"`             // 模型名称(如gemini-1.5-pro)
 	CreatedAt        time.Time      `json:"created_at"`        // 创建时间
 	HiddenAt         sql.NullTime   `json:"hidden_at"`         // 隐藏时间
 }

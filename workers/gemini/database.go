@@ -86,16 +86,18 @@ func (d *Database) InsertConversationTx(tx *sql.Tx, uuid, sourceType, title, met
 
 // InsertMessageTx 在事务中插入消息
 func (d *Database) InsertMessageTx(tx *sql.Tx, uuid, conversationUUID, parentUUID string, roundIndex int,
-	role, contentType, content string, createdAt time.Time) error {
+	role, contentType, content, thinking, model string, createdAt time.Time) error {
 	query := `
-		INSERT INTO messages (uuid, conversation_uuid, parent_uuid, round_index, role, content_type, content, created_at)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+		INSERT INTO messages (uuid, conversation_uuid, parent_uuid, round_index, role, content_type, content, thinking, model, created_at)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 		ON CONFLICT(uuid) DO UPDATE SET
 			parent_uuid = excluded.parent_uuid,
 			round_index = excluded.round_index,
-			content = excluded.content
+			content = excluded.content,
+			thinking = excluded.thinking,
+			model = excluded.model
 	`
-	_, err := tx.Exec(query, uuid, conversationUUID, parentUUID, roundIndex, role, contentType, content, createdAt)
+	_, err := tx.Exec(query, uuid, conversationUUID, parentUUID, roundIndex, role, contentType, content, thinking, model, createdAt)
 	return err
 }
 
